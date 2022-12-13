@@ -7,6 +7,7 @@ import { fCurrency } from '../../../utils/formatNumber';
 // components
 import Label from '../../../components/label';
 import { ColorPreview } from '../../../components/color-utils';
+import ActionDropdown from 'src/components/Dropdown/ActionDropdown';
 
 // ----------------------------------------------------------------------
 
@@ -24,16 +25,15 @@ ShopProductCard.propTypes = {
   product: PropTypes.object,
 };
 
-export default function ShopProductCard({ product }) {
-  const { name, } = product;
+export default function ShopProductCard({ product, onUpdateClick, onDeleteClick }) {
 
   return (
     <Card>
       <Box sx={{ pt: '100%', position: 'relative' }}>
-        {status && (
+        {product.active && (
           <Label
             variant="filled"
-            color={(status === 'sale' && 'error') || 'info'}
+            color={(product.active === 'sale' && 'error') || 'info'}
             sx={{
               zIndex: 9,
               top: 16,
@@ -42,34 +42,30 @@ export default function ShopProductCard({ product }) {
               textTransform: 'uppercase',
             }}
           >
-            {status}
+            {product.active}
           </Label>
         )}
-        <StyledProductImg alt={name} src={img} />
+        <StyledProductImg alt={product.name} src={`${process.env.REACT_APP_CLOUDINARYURL}${product.r_productDetails[0]?.img}`} />
       </Box>
 
       <Stack spacing={2} sx={{ p: 3 }}>
-        <Link color="inherit" underline="hover">
-          <Typography variant="subtitle2" noWrap>
-            {name}
-          </Typography>
-        </Link>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Link color="inherit" underline="hover" style={{ cursor: "pointer" }}>
+            <Typography variant="subtitle2" noWrap>
+              {product.name}
+            </Typography>
+          </Link>
+          <ActionDropdown 
+            clickedElement={product}
+            onUpdateClick={onUpdateClick}
+            onDeleteClick={onDeleteClick}
+          />
+        </Stack>
 
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <ColorPreview colors={colors} />
+          <ColorPreview colors={product.r_productDetails.map(detail => detail.color)} />
           <Typography variant="subtitle1">
-            <Typography
-              component="span"
-              variant="body1"
-              sx={{
-                color: 'text.disabled',
-                textDecoration: 'line-through',
-              }}
-            >
-              {priceSale && fCurrency(priceSale)}
-            </Typography>
-            &nbsp;
-            {fCurrency(price)}
+            {fCurrency(product.price)}
           </Typography>
         </Stack>
       </Stack>

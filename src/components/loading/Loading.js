@@ -1,6 +1,6 @@
 import React from "react";
 import ReactLoading from 'react-loading';
 
-const loading = ({ type, color }) => <ReactLoading type={type} color={color} height={'20%'} width={'20%'} />;
+const Loading = () => <ReactLoading type={"balls"} color={"black"} height={'100%'} width={'100%'} />;
 
-export default loading;
+export default Loading;

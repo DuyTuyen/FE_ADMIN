@@ -4,7 +4,7 @@ import DashboardLayout from './layouts/dashboard';
 
 import UserPage from './pages/UserPage';
 import LoginPage from './pages/LoginPage';
-import Page404 from './pages/Page404';
+import ErrorPage from './pages/ErrorPage';
 import ProductsPage from './pages/ProductsPage';
 import DashboardAppPage from './pages/DashboardAppPage';
 
@@ -15,6 +15,7 @@ export default function Router() {
     {
       path: '/dashboard',
       element: <DashboardLayout />,
+      errorElement: <ErrorPage />,
       children: [
         { element: <Navigate to="/dashboard/app" />, index: true },
         { path: 'app', element: <DashboardAppPage /> },
@@ -30,13 +31,13 @@ export default function Router() {
       element: <DashboardLayout />,
       children: [
         { element: <Navigate to="/dashboard/app" />, index: true },
-        { path: '404', element: <Page404 /> },
-        { path: '*', element: <Navigate to="/404" /> },
+        { path: 'error', element: <ErrorPage /> },
+        { path: '*', element: <Navigate to="/error" /> },
       ],
     },
     {
       path: '*',
-      element: <Navigate to="/404" replace />,
+      element: <Navigate to="/error" replace />,
     },
   ]);
 

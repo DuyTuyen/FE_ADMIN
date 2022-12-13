@@ -6,11 +6,37 @@ import { Container, Button, Stack, Typography } from '@mui/material';
 import { ProductSort, ProductList, ProductCartWidget, ProductFilterSidebar } from '../sections/@dashboard/products';
 import Iconify from '../components/iconify';
 
-import { productAPI } from '../api/ConfigAPI';
-
+import { brandAPI, categoryAPI, productAPI } from '../api/ConfigAPI';
+/*eslint-disable */
+import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { showLoading, closeLoading } from 'src/redux/slices/LoadingSlice';
+import { setErrorValue } from 'src/redux/slices/ErrorSlice';
+import { useNavigate } from 'react-router-dom';
+import Loading from 'src/components/loading/Loading';
+import CreateProductModal from 'src/sections/@dashboard/products/CreateProductModal';
+import UpdateProductModal from 'src/sections/@dashboard/products/UpdateProductModal';
+import DeleteProductModal from 'src/sections/@dashboard/products/DeleteProductModal';
 // ----------------------------------------------------------------------
 export default function ProductsPage() {
+  const loading = useSelector(state => state.loading.value)
+
+  const dispatch = useDispatch()
+
+  const navigate = useNavigate()
+
   const [openFilter, setOpenFilter] = useState(false);
+  const [products, setProducts] = useState([])
+  const [categories, setCategories] = useState([])
+  const [brands, setBrands] = useState([])
+
+  const [showCreateForm, setShowCreateForm] = useState(false);
+
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
+
+  const [showDeleteForm, setShowDeleteForm] = useState(false);
+
+  const [clickedElement, setClickedElement] = useState(null);
 
   const handleOpenFilter = () => {
     setOpenFilter(true);
@@ -19,16 +45,6 @@ export default function ProductsPage() {
   const handleCloseFilter = () => {
     setOpenFilter(false);
   };
-
-  const [product,setProduct]= useState([])
-
-  const [showCreateForm, setShowCreateForm] = useState(false);
-
-  const [showUpdateForm, setShowUpdateForm] = useState(false);
-
-  const [showDeleteForm, setShowDeleteForm] = useState(false);
-
-  const [activeProduct, setActiveProduct] = useState({});
 
   function hanldeCreateFormShow() {
     setShowCreateForm(true)
@@ -39,7 +55,7 @@ export default function ProductsPage() {
   }
 
   function handleUpdateFormShow(product) {
-    setActiveProduct(product)
+    setClickedElement(product)
     setShowUpdateForm(true)
   }
 
@@ -48,7 +64,7 @@ export default function ProductsPage() {
   }
 
   function handleDeleteFormShow(product) {
-    setActiveProduct(product);
+    setClickedElement(product);
     setShowDeleteForm(true);
   }
 
@@ -57,102 +73,145 @@ export default function ProductsPage() {
   }
 
   useEffect(() => {
-    async function getProduct() {
-      try {
-        const res = await productAPI.getAll();
-        setProduct(res.data)
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    getProduct()
+    dispatch(showLoading())
+    Promise.all([brandAPI.getAll(), categoryAPI.getAll(), productAPI.getAll()])
+      .then((results) => {
+        setBrands(results[0].data)
+        setCategories(results[1].data)
+        setProducts(results[2].data)
+      })
+      .catch(error => {
+        if (axios.isAxiosError(error))
+          dispatch(setErrorValue(error.response ? error.response.data.message : error.message))
+        else
+          dispatch(setErrorValue(error.toString()))
+        navigate("/error")
+      })
+      .finally(() => {
+        dispatch(closeLoading())
+      })
   }, [])
-  
-  async function handleOnSubmit(formRef) {
-    try {
-      const formData = new FormData(formRef.current)
 
-      const resData= await productAPI.create(formData)
-    } catch (error) {
-      console.log(error);
+  async function handleOnSubmitCreate(data) {
+    setShowCreateForm(false)
+    dispatch(showLoading())
+    try {
+      const res = await productAPI.create(data)
+      const newProducts = [...products]
+      newProducts.unshift(res.data)
+      setProducts(newProducts)
+    }
+    catch (error) {
+      if (axios.isAxiosError(error))
+        dispatch(setErrorValue(error.response ? error.response.data.message : error.message))
+      else
+        dispatch(setErrorValue(error.toString()))
+      setShowCreateForm(true)
+    }
+    finally {
+      dispatch(closeLoading())
     }
   }
 
-  async function handleOnSubmitUpdate(formRef) {
+  async function handleOnSubmitUpdate(data) {
+    setShowUpdateForm(false)
+    dispatch(showLoading())
     try {
-      const formData = new FormData(formRef.current)
-      formData.append('id', activeProduct._id)
-      const resData = await productAPI.update(formData)
-      setShowUpdateForm(false)
-      const filterProduct = product.filter((r) => r._id !== resData.data._id)
-      const updateProduct = [...filterProduct, resData.data]
-      setProduct(updateProduct)
-    } catch (error) {
-      console.log(error);
+      data['id'] = clickedElement._id
+      const resData = await productAPI.update(data)
+      const filterProducts = products.filter((r) => r._id !== resData.data._id)
+      const newProducts = [resData.data, ...filterProducts]
+      setProducts(newProducts)
+    }
+    catch (error) {
+      if (axios.isAxiosError(error))
+        dispatch(setErrorValue(error.response ? error.response.data.message : error.message))
+      else
+        dispatch(setErrorValue(error.toString()))
+      setShowUpdateForm(true)
+    }
+    finally {
+      dispatch(closeLoading())
     }
   }
 
   async function handleOnSubmitDelete() {
+    setShowDeleteForm(false)
+    dispatch(showLoading())
     try {
-      const resData = await productAPI.delete(activeProduct._id)
-      const updateProduct = product.filter((r) => r._id !== activeProduct._id)
-      setProduct(updateProduct)
-    } catch (error) {
-      console.log(error);
+      await productAPI.delete(clickedElement._id)
+      const newProducts = products.filter((r) => r._id !== clickedElement._id)
+      setProducts(newProducts)
+    }
+    catch (error) {
+      if (axios.isAxiosError(error))
+        alert(error.response ? error.response.data.message : error.message)
+      else
+        alert(error.toString())
+    }
+    finally {
+      dispatch(closeLoading())
     }
   }
 
   return (
-    <>
-      <Helmet>
-        <title> Dashboard: Products | Minimal UI </title>
-      </Helmet>
+    loading ?
+      <Loading /> :
+      <>
+        <Helmet>
+          <title> Dashboard: Products</title>
+        </Helmet>
 
-      {/* <CreateProduct
-        isShow={showCreateForm}
-        onSubmit={() => handleOnSubmit()}
-        onCreateProduct={() => hanldeCreateFormShow()}
-        onCloseFormShow={() => handleCloseCreateFormShow()}
-      />
-
-      <UpdateProduct
-        isShow={showUpdateForm}
-        activeProduct={activeProduct}
-        onSubmitUpdate={(e) => handleOnSubmitUpdate(e)}
-        onUpdateProduct={(e) => handleUpdateFormShow(e)}
-        onCloseUpdate={() => handleCloseUpdateFormShow()}
-      />
-      
-      <DeleteProduct
-        isShow={showDeleteForm}
-        activeProduct={activeProduct}
-        onSubmitDelete={() => handleOnSubmitDelete()}
-        onDeleteProduct={() => handleDeleteFormShow()}
-        onCloseDelete={() => handleCloseDeleteFormShow()}
-      /> */}
-      <Container>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-          <Typography variant="h4" gutterBottom>
-            PRODUCTS
-          </Typography>
-          <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
-            NEW PRODUCTS
-          </Button>
-        </Stack>
-        <Stack direction="row" flexWrap="wrap-reverse" alignItems="center" justifyContent="flex-end" sx={{ mb: 5 }}>
-          <Stack direction="row" spacing={1} flexShrink={0} sx={{ my: 1 }}>
-            <ProductFilterSidebar
-              openFilter={openFilter}
-              onOpenFilter={handleOpenFilter}
-              onCloseFilter={handleCloseFilter}
-            />
-            <ProductSort />
+        <Container>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
+            <Typography variant="h4" gutterBottom>
+              PRODUCTS
+            </Typography>
+            <Button onClick={hanldeCreateFormShow} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
+              NEW PRODUCTS
+            </Button>
           </Stack>
-        </Stack>
+          <Stack direction="row" flexWrap="wrap-reverse" alignItems="center" justifyContent="flex-end" sx={{ mb: 5 }}>
+            <Stack direction="row" spacing={1} flexShrink={0} sx={{ my: 1 }}>
+              <ProductFilterSidebar
+                openFilter={openFilter}
+                onOpenFilter={handleOpenFilter}
+                onCloseFilter={handleCloseFilter}
+              />
+              <ProductSort />
+            </Stack>
+          </Stack>
 
-        <ProductList products={product} />
-        <ProductCartWidget />
-      </Container>
-    </>
+          <ProductList
+            products={products}
+            onUpdateClick={handleUpdateFormShow}
+            onDeleteClick={handleDeleteFormShow}
+          />
+          <ProductCartWidget />
+        </Container>
+        <CreateProductModal
+          isShow={showCreateForm}
+          onSubmit={(data) => { handleOnSubmitCreate(data) }}
+          onClose={() => handleCloseCreateFormShow()}
+          categories={categories}
+          brands={brands}
+        />
+
+        <UpdateProductModal
+          isShow={showUpdateForm}
+          activeProduct={clickedElement}
+          onSubmit={(formData) => handleOnSubmitUpdate(formData)}
+          onClose={() => handleCloseUpdateFormShow()}
+          categories={categories}
+          brands={brands}
+        />
+
+        <DeleteProductModal
+          isShow={showDeleteForm}
+          activeProduct={clickedElement}
+          onSubmit={() => handleOnSubmitDelete()}
+          onClose={() => handleCloseDeleteFormShow()}
+        />
+      </>
   );
 }

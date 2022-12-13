@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const axi = axios.create({
-  baseURL: `http://127.0.0.1:3000`,
+  baseURL: `http://127.0.0.1:3003`,
 });
 const categoryAPI = {
   getAll: () => axi.get(`/category`),
@@ -21,18 +21,19 @@ const categoryAPI = {
 };
 const productAPI = {
   getAll: () => axi.get(`/product`),
-  create: (formData) =>
-    axi.post(`/product`, formData, {
+  create: (data) =>
+    axi.post(`/product`, data, {
       headers: {
         'Content-Type': `application/json`,
       },
     }),
-  update: (id, formData) =>
-    axi.put(`/product/${id}`, formData, {
+  update: (data) =>
+    axi.put(`/product/${data.id}`, data, {
       headers: {
         'Content-Type': `application/json`,
       },
     }),
+  delete: (id) => axi.delete(`/product/${id}`)
 };
 
 const productDetailAPI = {
@@ -45,7 +46,7 @@ const productDetailAPI = {
 };
 
 const brandAPI = {
-  getAll: () => axi.get(`/trademark`),
+  getAll: () => axi.get(`/brand`),
 };
 
 const userAPI = {
