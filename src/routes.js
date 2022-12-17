@@ -7,7 +7,9 @@ import LoginPage from './pages/LoginPage';
 import ErrorPage from './pages/ErrorPage';
 import ProductsPage from './pages/ProductsPage';
 import DashboardAppPage from './pages/DashboardAppPage';
-
+import CategoryPage from './pages/CategoryPage';
+import BrandPage from './pages/BrandPage';
+import ImportOrderPage from './pages/ImportOrderPage';
 // ----------------------------------------------------------------------
 
 export default function Router() {
@@ -21,6 +23,9 @@ export default function Router() {
         { path: 'app', element: <DashboardAppPage /> },
         { path: 'user', element: <UserPage /> },
         { path: 'products', element: <ProductsPage /> },
+        { path: 'category', element: <CategoryPage /> },
+        { path: 'brand', element: <BrandPage /> },
+        { path: 'importorder', element: <ImportOrderPage /> },
       ],
     },
     {

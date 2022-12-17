@@ -47,9 +47,23 @@ const productDetailAPI = {
 
 const brandAPI = {
   getAll: () => axi.get(`/brand`),
+  create: (formData) =>
+    axi.post(`/brand`, formData, {
+      headers: {
+        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+      },
+    }),
+  update: (id, formData) =>
+    axi.put(`/brand/${id}`, formData, {
+      headers: {
+        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+      },
+    }),
+  delete: (id) => axi.delete(`/brand/${id}`),
 };
 
 const userAPI = {
+  getAll: () => axi.get(`/user`),
   login: (formData) =>
     axi.post(`/user/login`, formData, {
       headers: {
@@ -58,4 +72,24 @@ const userAPI = {
     }),
 };
 
-export { categoryAPI, productAPI, brandAPI, userAPI, productDetailAPI };
+const importOrderAPI = {
+  getAll: () => axi.get(`/importorder`),
+  create: (formData) =>
+    axi.post(`/importorder`, formData, {
+      headers: {
+        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+      },
+    }),
+};
+
+const importOrderDetailAPI = {
+  getAll: () => axi.get(`/importorder`),
+  create: (formData) =>
+    axi.post(`/importorder`, formData, {
+      headers: {
+        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+      },
+    }),
+};
+
+export { categoryAPI, productAPI, brandAPI, userAPI, productDetailAPI, importOrderAPI, importOrderDetailAPI };

@@ -30,16 +30,21 @@ import Scrollbar from '../components/scrollbar';
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 // mock
 import USERLIST from '../_mock/user';
+import { userAPI } from 'src/api/ConfigAPI';
+import { useEffect } from 'react';
+import { setErrorValue } from 'src/redux/slices/ErrorSlice';
+import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { closeLoading, showLoading } from 'src/redux/slices/LoadingSlice';
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
   { id: 'name', label: 'Name', alignRight: false },
-  { id: 'company', label: 'Company', alignRight: false },
-  { id: 'role', label: 'Role', alignRight: false },
-  { id: 'isVerified', label: 'Verified', alignRight: false },
-  { id: 'status', label: 'Status', alignRight: false },
-  { id: '' },
+  { id: 'phone', label: 'Phone', alignRight: false },
+  { id: 'address', label: 'Address', alignRight: false },
+  { id: 'email', label: 'Email', alignRight: false },
 ];
 
 // ----------------------------------------------------------------------
@@ -74,6 +79,12 @@ function applySortFilter(array, comparator, query) {
 }
 
 export default function UserPage() {
+  const loading = useSelector((state) => state.loading.value);
+
+  const dispatch = useDispatch();
+
+  const navigate = useNavigate();
+  const [users, setUsers] = useState([]);
   const [open, setOpen] = useState(null);
 
   const [page, setPage] = useState(0);
@@ -146,6 +157,23 @@ export default function UserPage() {
 
   const isNotFound = !filteredUsers.length && !!filterName;
 
+  useEffect(() => {
+    async function getUsers() {
+      dispatch(showLoading());
+      try {
+        const res = await userAPI.getAll();
+        setUsers(res.data);
+      } catch (error) {
+        if (axios.isAxiosError(error))
+          dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
+        else dispatch(setErrorValue(error.toString()));
+      } finally {
+        dispatch(closeLoading());
+      }
+    }
+    getUsers();
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -175,37 +203,33 @@ export default function UserPage() {
                   rowCount={USERLIST.length}
                   numSelected={selected.length}
                   onRequestSort={handleRequestSort}
-                  onSelectAllClick={handleSelectAllClick}
                 />
                 <TableBody>
-                  {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    const { id, name, role, status, company, avatarUrl, isVerified } = row;
-                    const selectedUser = selected.indexOf(name) !== -1;
+                  {users.map((row) => {
+                    const { _id, name, phone, address, email } = row;
+                    // const selectedUser = selected.indexOf(name) !== -1;
 
                     return (
-                      <TableRow hover key={id} tabIndex={-1} role="checkbox" selected={selectedUser}>
-                        <TableCell padding="checkbox">
+                      <TableRow>
+                        {/*  <TableRow hover key={id} tabIndex={-1} role="checkbox" selected={selectedUser}> */}
+                        {/* <TableCell padding="checkbox">
                           <Checkbox checked={selectedUser} onChange={(event) => handleClick(event, name)} />
-                        </TableCell>
+                        </TableCell> */}
 
                         <TableCell component="th" scope="row" padding="none">
                           <Stack direction="row" alignItems="center" spacing={2}>
-                            <Avatar alt={name} src={avatarUrl} />
+                            <Avatar alt={name} />
                             <Typography variant="subtitle2" noWrap>
                               {name}
                             </Typography>
                           </Stack>
                         </TableCell>
 
-                        <TableCell align="left">{company}</TableCell>
+                        <TableCell align="left">{phone}</TableCell>
 
-                        <TableCell align="left">{role}</TableCell>
+                        <TableCell align="left">{address}</TableCell>
 
-                        <TableCell align="left">{isVerified ? 'Yes' : 'No'}</TableCell>
-
-                        <TableCell align="left">
-                          <Label color={(status === 'banned' && 'error') || 'success'}>{sentenceCase(status)}</Label>
-                        </TableCell>
+                        <TableCell align="left">{email}</TableCell>
 
                         <TableCell align="right">
                           <IconButton size="large" color="inherit" onClick={handleOpenMenu}>
