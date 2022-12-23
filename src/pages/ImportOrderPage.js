@@ -1,5 +1,4 @@
 import { Helmet } from 'react-helmet-async';
-import { filter } from 'lodash';
 import { useState } from 'react';
 // @mui
 import {
@@ -23,13 +22,12 @@ import {
   TableHead,
 } from '@mui/material';
 // components
-import Label from '../components/label';
 import Iconify from '../components/iconify';
 import Scrollbar from '../components/scrollbar';
 
 // mock
 
-import { importOrderAPI, importOrderDetailAPI, userAPI } from 'src/api/ConfigAPI';
+import { importOrderAPI } from 'src/api/ConfigAPI';
 import { useEffect } from 'react';
 import { setErrorValue } from 'src/redux/slices/ErrorSlice';
 import axios from 'axios';
@@ -37,6 +35,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { closeLoading, showLoading } from 'src/redux/slices/LoadingSlice';
 import CreateImportOrderModal from 'src/sections/@dashboard/importorder/CreateImportOrder';
+import { fCurrency } from 'src/utils/formatNumber';
+import { fDate } from 'src/utils/formatTime';
+import { Form } from 'react-bootstrap';
+import Loading from 'src/components/loading/Loading';
 
 export default function ImportOrderPage() {
   const loading = useSelector((state) => state.loading.value);
@@ -45,12 +47,10 @@ export default function ImportOrderPage() {
 
   const navigate = useNavigate();
 
-  const [importOrder, setImportOrder] = useState([]);
-
-  const [importOrderDetails, setImportOrderDetails] = useState([]);
+  const [importOrders, setImportOrder] = useState([]);
 
   const [showCreateForm, setShowCreateForm] = useState(false);
- 
+
   const [clickedElement, setClickedElement] = useState(null);
 
   function hanldeCreateFormShow() {
@@ -66,12 +66,13 @@ export default function ImportOrderPage() {
     async function getImportOrder() {
       dispatch(showLoading());
       try {
-        const res = await importOrderDetailAPI.getAll();
+        const res = await importOrderAPI.getAll();
         setImportOrder(res.data);
       } catch (error) {
         if (axios.isAxiosError(error))
           dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
         else dispatch(setErrorValue(error.toString()));
+        navigate("/error")
       } finally {
         dispatch(closeLoading());
       }
@@ -84,9 +85,9 @@ export default function ImportOrderPage() {
     dispatch(showLoading());
     try {
       const res = await importOrderAPI.create(formData);
-      const newImportOrders = [...importOrder];
-      newImportOrders.unshift(res.data);
-      setImportOrderDetails(newImportOrders);
+      const newImportOrders = [...importOrders];
+      newImportOrders.unshift(res.data[0]);
+      setImportOrder(newImportOrders);
     } catch (error) {
       if (axios.isAxiosError(error))
         dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
@@ -98,70 +99,82 @@ export default function ImportOrderPage() {
   }
 
   return (
-    <>
-      <Helmet>
-        <title> ImportOrder | Minimal UI </title>
-      </Helmet>
+    loading ?
+      <Loading /> :
+      <>
+        <Helmet>
+          <title> ImportOrder | Minimal UI </title>
+        </Helmet>
 
-      <Container>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-          <Typography variant="h4" gutterBottom>
-            ImportOrder
-          </Typography>
-          <Button onClick={hanldeCreateFormShow} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
-            New ImportOrder
-          </Button>
-        </Stack>
+        <Container>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
+            <Typography variant="h4" gutterBottom>
+              Đơn nhập hàng
+            </Typography>
+            <Button onClick={hanldeCreateFormShow} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
+              Tạo mới
+            </Button>
+          </Stack>
 
-        <Card>
-          <Scrollbar>
-            <TableContainer sx={{ minWidth: 800 }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Quantity</TableCell>
-                    <TableCell>Price</TableCell>
-                    <TableCell>Size</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {importOrderDetails.map((row) => {
-                    const { _id, quantity, price, size } = row;
-                    // const selectedUser = selected.indexOf(name) !== -1;
+          <Card>
+            <Scrollbar>
+              <TableContainer sx={{ minWidth: 800 }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Mã định danh</TableCell>
+                      <TableCell>Tổng tiền</TableCell>
+                      <TableCell>Chi tiết</TableCell>
+                      <TableCell>Ngày nhập hàng</TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {importOrders.map((row) => {
+                      return (
+                        <TableRow key={row._id}>
 
-                    return (
-                      <TableRow>
-                        <TableCell component="th" scope="row" padding="none">
-                          <Stack direction="row" alignItems="center" spacing={2}></Stack>
-                        </TableCell>
 
-                        <TableCell align="left">{quantity}</TableCell>
+                          <TableCell align="left">{row._id}</TableCell>
 
-                        <TableCell align="left">{price}</TableCell>
+                          <TableCell align="left">{fCurrency(row.totalPrice)}</TableCell>
 
-                        <TableCell align="left">{size}</TableCell>
-
-                        <TableCell align="right">
-                          <IconButton size="large" color="inherit">
-                            <Iconify icon={'eva:more-vertical-fill'} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Scrollbar>
-        </Card>
-      </Container>
-      <CreateImportOrderModal
-        isShow={showCreateForm}
-        onSubmit={(data) => {
-          handleOnSubmitCreate(data);
-        }}
-        onClose={() => handleCloseCreateFormShow()}
-      />
-    </>
+                          <TableCell align="left">
+                            <Form.Select aria-label="Default select example">
+                              {
+                                row.r_importOrderDetails.map(detail => (
+                                  <option key={detail._id}>
+                                    {detail.r_productDetail.r_product.name} {detail.r_productDetail.color} {detail.size} - {fCurrency(detail.price)} - {detail.quantity} sản phẩm 
+                                  </option>
+                                ))
+                              }
+                            </Form.Select>
+                          </TableCell>
+                          <TableCell align="left">
+                            {fDate(row.importedAt)}
+                          </TableCell>
+                          <TableCell align="right">
+                            <IconButton size="large" color="inherit">
+                              <Iconify icon={'eva:more-vertical-fill'} />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Scrollbar>
+          </Card>
+        </Container>
+        <CreateImportOrderModal
+          isShow={showCreateForm}
+          onSubmit={(data) => {
+            handleOnSubmitCreate(data);
+          }}
+          onShow={() => hanldeCreateFormShow()}
+          onClose={() => handleCloseCreateFormShow()}
+        />
+      </>
   );
 }

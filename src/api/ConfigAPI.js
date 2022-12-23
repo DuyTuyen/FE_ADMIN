@@ -20,7 +20,7 @@ const categoryAPI = {
   delete: (id) => axi.delete(`/category/${id}`),
 };
 const productAPI = {
-  getAll: () => axi.get(`/product`),
+  getAll: () => axi.get(`/product/admin`),
   create: (data) =>
     axi.post(`/product`, data, {
       headers: {
@@ -74,10 +74,10 @@ const userAPI = {
 
 const importOrderAPI = {
   getAll: () => axi.get(`/importorder`),
-  create: (formData) =>
-    axi.post(`/importorder`, formData, {
+  create: (data) =>
+    axi.post(`/importorder`, data, {
       headers: {
-        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+        'Content-Type': `application/json`,
       },
     }),
 };
