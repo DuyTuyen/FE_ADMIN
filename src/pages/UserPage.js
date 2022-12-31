@@ -180,7 +180,6 @@ export default function UserPage() {
         <title> User | Minimal UI </title>
       </Helmet>
 
-      <Container>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
             USER
@@ -283,8 +282,7 @@ export default function UserPage() {
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
         </Card>
-      </Container>
-
+        
       <Popover
         open={Boolean(open)}
         anchorEl={open}

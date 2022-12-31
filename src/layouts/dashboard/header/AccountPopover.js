@@ -4,6 +4,9 @@ import { alpha } from '@mui/material/styles';
 import { Box, Divider, Typography, Stack, MenuItem, Avatar, IconButton, Popover } from '@mui/material';
 // mocks_
 import account from '../../../_mock/account';
+import { clearToken } from 'src/redux/slices/TokenSlice';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
 // ----------------------------------------------------------------------
 
@@ -26,6 +29,8 @@ const MENU_OPTIONS = [
 
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
+  const navigate = useNavigate();
+  const dispatch = useDispatch()
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -34,6 +39,13 @@ export default function AccountPopover() {
   const handleClose = () => {
     setOpen(null);
   };
+
+  const handleLogout = () => {
+    handleClose()
+    alert("Đăng xuất thành công")
+    dispatch(clearToken())
+    navigate("/login")
+  }
 
   return (
     <>
@@ -97,7 +109,7 @@ export default function AccountPopover() {
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        <MenuItem onClick={handleClose} sx={{ m: 1 }}>
+        <MenuItem onClick={handleLogout} sx={{ m: 1 }}>
           Logout
         </MenuItem>
       </Popover>

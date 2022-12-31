@@ -64,8 +64,8 @@ const brandAPI = {
 
 const userAPI = {
   getAll: () => axi.get(`/user`),
-  login: (formData) =>
-    axi.post(`/user/login`, formData, {
+  login: (data) =>
+    axi.post(`/user/login`, data, {
       headers: {
         'Content-Type': `application/json`,
       },
@@ -82,14 +82,18 @@ const importOrderAPI = {
     }),
 };
 
-const importOrderDetailAPI = {
-  getAll: () => axi.get(`/importorder`),
-  create: (formData) =>
-    axi.post(`/importorder`, formData, {
-      headers: {
-        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
-      },
-    }),
+const orderAPI = {
+  getAll: () => axi.get(`/order`),
+  update: (data) => axi.put(`/order/${data.id}`,{status: data.status},{
+    headers: {
+      'Content-Type': `application/json`,
+    },
+  })
 };
 
-export { categoryAPI, productAPI, brandAPI, userAPI, productDetailAPI, importOrderAPI, importOrderDetailAPI };
+const statisticAPI = {
+  getRevenue: () => axi.get(`/statistic/revenue`),
+  getTopSoldProducts: () => axi.get(`/statistic/topSoldProduct`)
+}
+
+export { statisticAPI, categoryAPI, productAPI, brandAPI, userAPI, productDetailAPI, importOrderAPI, orderAPI };

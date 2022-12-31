@@ -10,6 +10,7 @@ import DashboardAppPage from './pages/DashboardAppPage';
 import CategoryPage from './pages/CategoryPage';
 import BrandPage from './pages/BrandPage';
 import ImportOrderPage from './pages/ImportOrderPage';
+import OrderPage from './pages/OrderPage';
 // ----------------------------------------------------------------------
 
 export default function Router() {
@@ -26,6 +27,7 @@ export default function Router() {
         { path: 'category', element: <CategoryPage /> },
         { path: 'brand', element: <BrandPage /> },
         { path: 'importorder', element: <ImportOrderPage /> },
+        { path: 'order', element: <OrderPage /> },
       ],
     },
     {

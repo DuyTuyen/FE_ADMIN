@@ -5,20 +5,14 @@ import {
   Card,
   Table,
   Stack,
-  Paper,
-  Avatar,
   Button,
-  Popover,
-  Checkbox,
   TableRow,
-  MenuItem,
   TableBody,
   TableCell,
   Container,
   Typography,
   IconButton,
   TableContainer,
-  TablePagination,
   TableHead,
 } from '@mui/material';
 // components
@@ -86,7 +80,7 @@ export default function ImportOrderPage() {
     try {
       const res = await importOrderAPI.create(formData);
       const newImportOrders = [...importOrders];
-      newImportOrders.unshift(res.data[0]);
+      newImportOrders.unshift(res.data);
       setImportOrder(newImportOrders);
     } catch (error) {
       if (axios.isAxiosError(error))
@@ -106,7 +100,6 @@ export default function ImportOrderPage() {
           <title> ImportOrder | Minimal UI </title>
         </Helmet>
 
-        <Container>
           <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
             <Typography variant="h4" gutterBottom>
               Đơn nhập hàng
@@ -166,7 +159,6 @@ export default function ImportOrderPage() {
               </TableContainer>
             </Scrollbar>
           </Card>
-        </Container>
         <CreateImportOrderModal
           isShow={showCreateForm}
           onSubmit={(data) => {

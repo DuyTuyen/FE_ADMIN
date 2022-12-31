@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 // @mui
 import { styled } from '@mui/material/styles';
 //
 import Header from './header';
 import Nav from './nav';
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
 // ----------------------------------------------------------------------
 
@@ -34,6 +36,19 @@ const Main = styled('div')(({ theme }) => ({
 
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate()
+  const {token} = useSelector(state => {
+    return {
+      token: state.token.value
+    }
+  })
+
+  useEffect(() => {
+    if(!token){
+      alert("Bạn phải đăng nhập trước khi vào")
+      navigate("/login")
+    }
+  },[token])
 
   return (
     <StyledRoot>

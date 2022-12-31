@@ -55,17 +55,17 @@ function ActionDropdown(props) {
           onDetailClick &&
           <MenuItem onClick={handleUpdateClick}>
             <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-            More Details
+            Xem chi tiết
           </MenuItem>
         }
         <MenuItem onClick={handleUpdateClick}>
           <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-          Edit
+          Sửa 
         </MenuItem>
 
         <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
           <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
-          Delete
+          Xóa
         </MenuItem>
       </Popover>
     </>

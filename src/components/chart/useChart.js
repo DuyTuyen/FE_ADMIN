@@ -1,28 +1,11 @@
 import merge from 'lodash/merge';
 // @mui
-import { useTheme, alpha } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 
 // ----------------------------------------------------------------------
 
 export default function useChart(options) {
   const theme = useTheme();
-
-  const LABEL_TOTAL = {
-    show: true,
-    label: 'Total',
-    color: theme.palette.text.secondary,
-    fontSize: theme.typography.subtitle2.fontSize,
-    fontWeight: theme.typography.subtitle2.fontWeight,
-    lineHeight: theme.typography.subtitle2.lineHeight,
-  };
-
-  const LABEL_VALUE = {
-    offsetY: 8,
-    color: theme.palette.text.primary,
-    fontSize: theme.typography.h3.fontSize,
-    fontWeight: theme.typography.h3.fontWeight,
-    lineHeight: theme.typography.h3.lineHeight,
-  };
 
   const baseOptions = {
     // Colors
@@ -132,48 +115,6 @@ export default function useChart(options) {
       bar: {
         borderRadius: 4,
         columnWidth: '28%',
-      },
-
-      // Pie + Donut
-      pie: {
-        donut: {
-          labels: {
-            show: true,
-            value: LABEL_VALUE,
-            total: LABEL_TOTAL,
-          },
-        },
-      },
-
-      // Radialbar
-      radialBar: {
-        track: {
-          strokeWidth: '100%',
-          background: alpha(theme.palette.grey[500], 0.16),
-        },
-        dataLabels: {
-          value: LABEL_VALUE,
-          total: LABEL_TOTAL,
-        },
-      },
-
-      // Radar
-      radar: {
-        polygons: {
-          fill: { colors: ['transparent'] },
-          strokeColors: theme.palette.divider,
-          connectorColors: theme.palette.divider,
-        },
-      },
-
-      // polarArea
-      polarArea: {
-        rings: {
-          strokeColor: theme.palette.divider,
-        },
-        spokes: {
-          connectorColors: theme.palette.divider,
-        },
       },
     },
 
