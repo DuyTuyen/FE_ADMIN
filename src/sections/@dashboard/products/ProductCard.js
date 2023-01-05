@@ -25,7 +25,7 @@ ShopProductCard.propTypes = {
   product: PropTypes.object,
 };
 
-export default function ShopProductCard({ product, onUpdateClick, onDeleteClick }) {
+export default function ShopProductCard({ product, onUpdateClick, onDeleteClick, onDetailClick }) {
 
   return (
     <Card>
@@ -59,6 +59,7 @@ export default function ShopProductCard({ product, onUpdateClick, onDeleteClick 
             clickedElement={product}
             onUpdateClick={onUpdateClick}
             onDeleteClick={onDeleteClick}
+            onDetailClick={onDetailClick}
           />
         </Stack>
 

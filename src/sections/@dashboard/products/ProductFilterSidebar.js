@@ -6,10 +6,7 @@ import {
   Stack,
   Button,
   Drawer,
-  Rating,
   Divider,
-  Checkbox,
-  FormGroup,
   IconButton,
   Typography,
   RadioGroup,
@@ -19,32 +16,26 @@ import {
 import Iconify from '../../../components/iconify';
 import Scrollbar from '../../../components/scrollbar';
 import { ColorMultiPicker } from '../../../components/color-utils';
+import { useEffect, useState } from 'react';
+import { closeLoading, showLoading } from 'src/redux/slices/LoadingSlice';
+import { categoryAPI, productAPI } from 'src/api/ConfigAPI';
+import axios from 'axios';
+import { setErrorValue } from 'src/redux/slices/ErrorSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import Loading from 'src/components/loading/Loading';
 
 // ----------------------------------------------------------------------
 
-export const SORT_BY_OPTIONS = [
-  { value: 'featured', label: 'Featured' },
-  { value: 'newest', label: 'Newest' },
-  { value: 'priceDesc', label: 'Price: High-Low' },
-  { value: 'priceAsc', label: 'Price: Low-High' },
-];
-export const FILTER_GENDER_OPTIONS = ['Men', 'Women', 'Kids'];
-export const FILTER_CATEGORY_OPTIONS = ['All', 'Shose', 'Apparel', 'Accessories'];
-export const FILTER_RATING_OPTIONS = ['up4Star', 'up3Star', 'up2Star', 'up1Star'];
-export const FILTER_PRICE_OPTIONS = [
-  { value: 'below', label: 'Below $25' },
-  { value: 'between', label: 'Between $25 - $75' },
-  { value: 'above', label: 'Above $75' },
-];
-export const FILTER_COLOR_OPTIONS = [
-  '#00AB55',
-  '#000000',
-  '#FFFFFF',
-  '#FFC0CB',
-  '#FF4842',
-  '#1890FF',
-  '#94D82D',
-  '#FFC107',
+export const COLORS = [
+  "blue",
+  "brown",
+  "gray",
+  "green",
+  "orange",
+  "pink",
+  "red",
+  "black",
+  "white"
 ];
 
 // ----------------------------------------------------------------------
@@ -55,11 +46,42 @@ ShopFilterSidebar.propTypes = {
   onCloseFilter: PropTypes.func,
 };
 
-export default function ShopFilterSidebar({ openFilter, onOpenFilter, onCloseFilter }) {
+export default function ShopFilterSidebar({ openFilter, onOpenFilter, onCloseFilter, onFilter }) {
+  const dispatch = useDispatch()
+  const [categories, setCategories] = useState([])
+  const [selectedCate, setSelectedCate] = useState(null)
+  const [selectedColors, setSelectedColors] = useState([])
+
+  useEffect(() => {
+    async function getCategoties() {
+      try {
+        const res = await categoryAPI.getAll();
+        setCategories(res.data);
+      } catch (error) {
+        if (axios.isAxiosError(error))
+          dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
+        else dispatch(setErrorValue(error.toString()));
+      } finally {
+      }
+    }
+    if (openFilter)
+      getCategoties();
+  }, [dispatch, openFilter]);
+
+
+  function handleChangeColor(isChecked, color) {
+    if (isChecked) {
+      const tempColors = [...selectedColors, color]
+      setSelectedColors(tempColors)
+    } else {
+      const tempColors = selectedColors.filter(c => c !== color)
+      setSelectedColors(tempColors)
+    }
+  }
   return (
     <>
       <Button disableRipple color="inherit" endIcon={<Iconify icon="ic:round-filter-list" />} onClick={onOpenFilter}>
-        Filters&nbsp;
+        Lọc&nbsp;
       </Button>
 
       <Drawer
@@ -72,7 +94,7 @@ export default function ShopFilterSidebar({ openFilter, onOpenFilter, onCloseFil
       >
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 1, py: 2 }}>
           <Typography variant="subtitle1" sx={{ ml: 1 }}>
-            Filters
+            Lọc sản phẩm
           </Typography>
           <IconButton onClick={onCloseFilter}>
             <Iconify icon="eva:close-fill" />
@@ -85,79 +107,28 @@ export default function ShopFilterSidebar({ openFilter, onOpenFilter, onCloseFil
           <Stack spacing={3} sx={{ p: 3 }}>
             <div>
               <Typography variant="subtitle1" gutterBottom>
-                Gender
-              </Typography>
-              <FormGroup>
-                {FILTER_GENDER_OPTIONS.map((item) => (
-                  <FormControlLabel key={item} control={<Checkbox />} label={item} />
-                ))}
-              </FormGroup>
-            </div>
-
-            <div>
-              <Typography variant="subtitle1" gutterBottom>
-                Category
+                Danh mục sản phẩm
               </Typography>
               <RadioGroup>
-                {FILTER_CATEGORY_OPTIONS.map((item) => (
-                  <FormControlLabel key={item} value={item} control={<Radio />} label={item} />
+                {categories.map((item) => (
+                  <FormControlLabel onChange={(e) => {
+                    setSelectedCate(e.target.value)
+                  }} key={item._id} value={item._id} control={<Radio />} label={item.name} />
                 ))}
               </RadioGroup>
             </div>
 
             <div>
               <Typography variant="subtitle1" gutterBottom>
-                Colors
+                Màu sắc
               </Typography>
               <ColorMultiPicker
                 name="colors"
-                selected={[]}
-                colors={FILTER_COLOR_OPTIONS}
-                onChangeColor={(color) => [].includes(color)}
+                selected={selectedColors}
+                colors={COLORS}
+                onChangeColor={handleChangeColor}
                 sx={{ maxWidth: 38 * 4 }}
               />
-            </div>
-
-            <div>
-              <Typography variant="subtitle1" gutterBottom>
-                Price
-              </Typography>
-              <RadioGroup>
-                {FILTER_PRICE_OPTIONS.map((item) => (
-                  <FormControlLabel key={item.value} value={item.value} control={<Radio />} label={item.label} />
-                ))}
-              </RadioGroup>
-            </div>
-
-            <div>
-              <Typography variant="subtitle1" gutterBottom>
-                Rating
-              </Typography>
-              <RadioGroup>
-                {FILTER_RATING_OPTIONS.map((item, index) => (
-                  <FormControlLabel
-                    key={item}
-                    value={item}
-                    control={
-                      <Radio
-                        disableRipple
-                        color="default"
-                        icon={<Rating readOnly value={4 - index} />}
-                        checkedIcon={<Rating readOnly value={4 - index} />}
-                        sx={{
-                          '&:hover': { bgcolor: 'transparent' },
-                        }}
-                      />
-                    }
-                    label="& Up"
-                    sx={{
-                      my: 0.5,
-                      borderRadius: 1,
-                      '&:hover': { opacity: 0.48 },
-                    }}
-                  />
-                ))}
-              </RadioGroup>
             </div>
           </Stack>
         </Scrollbar>
@@ -169,9 +140,12 @@ export default function ShopFilterSidebar({ openFilter, onOpenFilter, onCloseFil
             type="submit"
             color="inherit"
             variant="outlined"
-            startIcon={<Iconify icon="ic:round-clear-all" />}
+            onClick={() => {
+              if (openFilter)
+                onFilter({ selectedCate, selectedColors })
+            }}
           >
-            Clear All
+            Thực hiện lọc
           </Button>
         </Box>
       </Drawer>

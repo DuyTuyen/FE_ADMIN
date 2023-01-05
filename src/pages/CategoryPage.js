@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 // @mui
 import { Container, Button, Stack, Typography } from '@mui/material';
 // components
-import { CategoryList, CategoryCartWidget } from '../sections/@dashboard/categories';
+import { CategoryList } from '../sections/@dashboard/categories';
 import Iconify from '../components/iconify';
 
 import { categoryAPI } from '../api/ConfigAPI';
@@ -151,7 +151,6 @@ export default function CategoriesPage() {
           onUpdateClick={handleUpdateFormShow}
           onDeleteClick={handleDeleteFormShow}
         />
-        <CategoryCartWidget />
       </Container>
       <CreateCategoryModal
         isShow={showCreateForm}

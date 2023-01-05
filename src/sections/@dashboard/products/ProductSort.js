@@ -7,13 +7,11 @@ import Iconify from '../../../components/iconify';
 // ----------------------------------------------------------------------
 
 const SORT_BY_OPTIONS = [
-  { value: 'featured', label: 'Featured' },
-  { value: 'newest', label: 'Newest' },
-  { value: 'priceDesc', label: 'Price: High-Low' },
-  { value: 'priceAsc', label: 'Price: Low-High' },
+  { value: 'desc', label: 'Giá: cao -> thấp' },
+  { value: 'asc', label: 'Giá: thấp -> cao' },
 ];
 
-export default function ShopProductSort() {
+export default function ShopProductSort({onSort}) {
   const [open, setOpen] = useState(null);
 
   const handleOpen = (event) => {
@@ -32,9 +30,9 @@ export default function ShopProductSort() {
         onClick={handleOpen}
         endIcon={<Iconify icon={open ? 'eva:chevron-up-fill' : 'eva:chevron-down-fill'} />}
       >
-        Sort By:&nbsp;
+        Sắp xếp:&nbsp;
         <Typography component="span" variant="subtitle2" sx={{ color: 'text.secondary' }}>
-          Newest
+
         </Typography>
       </Button>
       <Menu
@@ -48,9 +46,13 @@ export default function ShopProductSort() {
         {SORT_BY_OPTIONS.map((option) => (
           <MenuItem
             key={option.value}
-            selected={option.value === 'newest'}
-            onClick={handleClose}
+            selected={option.value === 'desc'}
             sx={{ typography: 'body2' }}
+            onClick={() => {
+              if (onSort)
+                onSort(option.value)
+              handleClose()
+            }}
           >
             {option.label}
           </MenuItem>

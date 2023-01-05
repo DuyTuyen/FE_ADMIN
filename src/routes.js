@@ -1,4 +1,4 @@
-import { Navigate, useRoutes } from 'react-router-dom';
+import { Navigate, useNavigate, useRoutes } from 'react-router-dom';
 // layouts
 import DashboardLayout from './layouts/dashboard';
 
@@ -11,9 +11,15 @@ import CategoryPage from './pages/CategoryPage';
 import BrandPage from './pages/BrandPage';
 import ImportOrderPage from './pages/ImportOrderPage';
 import OrderPage from './pages/OrderPage';
+import ConsignmentPage from './pages/ConsignmentPage';
+import { protectedAPI } from './api/ConfigAPI';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 // ----------------------------------------------------------------------
 
 export default function Router() {
+
   const routes = useRoutes([
     {
       path: '/dashboard',
@@ -21,13 +27,48 @@ export default function Router() {
       errorElement: <ErrorPage />,
       children: [
         { element: <Navigate to="/dashboard/app" />, index: true },
-        { path: 'app', element: <DashboardAppPage /> },
-        { path: 'user', element: <UserPage /> },
-        { path: 'products', element: <ProductsPage /> },
-        { path: 'category', element: <CategoryPage /> },
-        { path: 'brand', element: <BrandPage /> },
-        { path: 'importorder', element: <ImportOrderPage /> },
-        { path: 'order', element: <OrderPage /> },
+        {
+          path: 'app',
+          element: <ProtectedRoute>
+            <DashboardAppPage />
+          </ProtectedRoute>
+        },
+        {
+          path: 'user',
+          element: <ProtectedRoute>
+            <UserPage />
+          </ProtectedRoute>
+        },
+        {
+          path: 'products', element: <ProtectedRoute>
+            <ProductsPage />
+          </ProtectedRoute>
+        },
+        {
+          path: 'category', element: <ProtectedRoute>
+            <CategoryPage />
+          </ProtectedRoute>
+        },
+        {
+          path: 'brand', element: <ProtectedRoute>
+            <BrandPage />
+          </ProtectedRoute>
+        },
+        {
+          path: 'importorder', element: <ProtectedRoute>
+            <ImportOrderPage />
+          </ProtectedRoute>
+        },
+        {
+          path: 'order', element: <ProtectedRoute>
+            <OrderPage />
+          </ProtectedRoute>
+        },
+        {
+          path: 'consignment', element: <ProtectedRoute>
+            <ConsignmentPage />
+          </ProtectedRoute>
+        },
       ],
     },
     {
@@ -50,3 +91,29 @@ export default function Router() {
 
   return routes;
 }
+
+function ProtectedRoute(props) {
+  const { permission, children } = props
+  const [isAuthor, setIsAuthor] = useState(false)
+  const token = useSelector(state => state.token.value)
+  const navigate = useNavigate()
+  useEffect(() => {
+    async function checkRoute() {
+      try {
+        const res = await protectedAPI.checkRoute(token)
+        setIsAuthor(true)
+      } catch (error) {
+        if (axios.isAxiosError(error))
+          alert((error.response ? error.response.data.message : error.message));
+        else
+          alert((error.toString()));
+        navigate("/login")
+      }
+    }
+    checkRoute()
+  }, [children])
+
+  return (
+    isAuthor && children 
+  );
+}   

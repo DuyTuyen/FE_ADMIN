@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 // @mui
 import { Container, Button, Stack, Typography } from '@mui/material';
 // components
-import { ProductSort, ProductList, ProductCartWidget, ProductFilterSidebar } from '../sections/@dashboard/products';
+import { ProductSort, ProductList, ProductFilterSidebar } from '../sections/@dashboard/products';
 import Iconify from '../components/iconify';
 
 import { brandAPI, categoryAPI, productAPI } from '../api/ConfigAPI';
@@ -17,6 +17,7 @@ import Loading from 'src/components/loading/Loading';
 import CreateProductModal from 'src/sections/@dashboard/products/CreateProductModal';
 import UpdateProductModal from 'src/sections/@dashboard/products/UpdateProductModal';
 import DeleteProductModal from 'src/sections/@dashboard/products/DeleteProductModal';
+import ProductDetailModal from 'src/sections/@dashboard/products/ProductDetailModal';
 // ----------------------------------------------------------------------
 export default function ProductsPage() {
   const loading = useSelector(state => state.loading.value)
@@ -35,6 +36,8 @@ export default function ProductsPage() {
   const [showUpdateForm, setShowUpdateForm] = useState(false);
 
   const [showDeleteForm, setShowDeleteForm] = useState(false);
+
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const [clickedElement, setClickedElement] = useState(null);
 
@@ -70,6 +73,15 @@ export default function ProductsPage() {
 
   function handleCloseDeleteFormShow() {
     setShowDeleteForm(false)
+  }
+
+  function handleDetailModalShow(product) {
+    setClickedElement(product);
+    setShowDetailModal(true);
+  }
+
+  function handleCloseDetailModalShow() {
+    setShowDetailModal(false)
   }
 
   useEffect(() => {
@@ -154,21 +166,52 @@ export default function ProductsPage() {
     }
   }
 
+  async function filterProducts({ selectedCate, selectedColors }) {
+    try {
+      dispatch(showLoading())
+      let myFilter = ""
+      myFilter += selectedColors.reduce((q_color, item) => `${q_color}color[]=${item}&`, "")
+      if (selectedCate)
+        myFilter += `r_category=${selectedCate}`
+      const res = await productAPI.filter(myFilter)
+      setProducts(res.data)
+    } catch (error) {
+      if (axios.isAxiosError(error))
+        dispatch(setErrorValue(error.response ? error.response.data.message : error.message))
+      else
+        dispatch(setErrorValue(error.toString()))
+      navigate("/error")
+    }
+    finally {
+      dispatch(closeLoading())
+    }
+  }
+
+  async function sortProducts(type){
+    let tempProducts = [...products]
+    console.log(type)
+    if(type === 'asc')
+      tempProducts.sort((a,b)=> a.price - b.price)
+    else
+    tempProducts.sort((a,b)=> b.price - a.price)
+    setProducts(tempProducts)
+  }
+
   return (
     loading ?
       <Loading /> :
       <>
         <Helmet>
-          <title> Dashboard: Products</title>
+          <title> Sản phẩm</title>
         </Helmet>
 
         <Container>
           <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
             <Typography variant="h4" gutterBottom>
-              PRODUCTS
+              Sản phẩm
             </Typography>
             <Button onClick={hanldeCreateFormShow} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
-              NEW PRODUCTS
+              Tạo mới
             </Button>
           </Stack>
           <Stack direction="row" flexWrap="wrap-reverse" alignItems="center" justifyContent="flex-end" sx={{ mb: 5 }}>
@@ -177,8 +220,11 @@ export default function ProductsPage() {
                 openFilter={openFilter}
                 onOpenFilter={handleOpenFilter}
                 onCloseFilter={handleCloseFilter}
+                onFilter={filterProducts}
               />
-              <ProductSort />
+              <ProductSort 
+                onSort={sortProducts}
+              />
             </Stack>
           </Stack>
 
@@ -186,8 +232,8 @@ export default function ProductsPage() {
             products={products}
             onUpdateClick={handleUpdateFormShow}
             onDeleteClick={handleDeleteFormShow}
+            onDetailClick={handleDetailModalShow}
           />
-          <ProductCartWidget />
         </Container>
         <CreateProductModal
           isShow={showCreateForm}
@@ -211,6 +257,12 @@ export default function ProductsPage() {
           activeProduct={clickedElement}
           onSubmit={() => handleOnSubmitDelete()}
           onClose={() => handleCloseDeleteFormShow()}
+        />
+
+        <ProductDetailModal
+          isShow={showDetailModal}
+          product={clickedElement}
+          onClose={handleCloseDetailModalShow}
         />
       </>
   );

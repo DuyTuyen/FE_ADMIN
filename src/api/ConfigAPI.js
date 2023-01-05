@@ -21,6 +21,7 @@ const categoryAPI = {
 };
 const productAPI = {
   getAll: () => axi.get(`/product/admin`),
+  filter: (myFilter) => axi.get(`/product/admin?${myFilter}`),
   create: (data) =>
     axi.post(`/product`, data, {
       headers: {
@@ -65,7 +66,7 @@ const brandAPI = {
 const userAPI = {
   getAll: () => axi.get(`/user`),
   login: (data) =>
-    axi.post(`/user/login`, data, {
+    axi.post(`/user/login/admin`, data, {
       headers: {
         'Content-Type': `application/json`,
       },
@@ -96,4 +97,31 @@ const statisticAPI = {
   getTopSoldProducts: () => axi.get(`/statistic/topSoldProduct`)
 }
 
-export { statisticAPI, categoryAPI, productAPI, brandAPI, userAPI, productDetailAPI, importOrderAPI, orderAPI };
+const notificationAPI = {
+  getAll: () => axi.get(`/notification/admin`),
+  updateIsRead: (id) => axi.put(`/notification/${id}`)
+}
+
+const consignmentAPI = {
+  getAll: () => axi.get(`/consignment`),
+  updateStatus: ({id,status}) => axi.put(`/consignment/${id}`,{status},{
+    headers: {
+      'Content-Type': `application/json`,
+    },
+  })
+}
+
+const protectedAPI = {
+  checkRoute: (token) => axi.get(`/protected/admin`,{
+    headers: {
+      "x-access-token": token
+    }
+  }),
+  checkAction: (token,permissions) => axi.get(`/protected/admin?permissions[]=${permissions}`,{
+    headers: {
+      "x-access-token": token
+    }
+  })
+}
+
+export {protectedAPI ,statisticAPI, categoryAPI, productAPI, brandAPI, userAPI, productDetailAPI, importOrderAPI, orderAPI, notificationAPI,consignmentAPI };

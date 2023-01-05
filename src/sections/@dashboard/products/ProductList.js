@@ -9,7 +9,7 @@ ProductList.propTypes = {
   products: PropTypes.array.isRequired,
 };
 
-export default function ProductList({ products,onUpdateClick, onDeleteClick, ...other }) {
+export default function ProductList({ products,onUpdateClick, onDeleteClick, onDetailClick, ...other }) {
   return (
     <Grid container spacing={3} {...other}>
       {products.map((product) => (
@@ -18,6 +18,7 @@ export default function ProductList({ products,onUpdateClick, onDeleteClick, ...
             product={product}
             onUpdateClick={onUpdateClick}
             onDeleteClick={onDeleteClick}
+            onDetailClick={onDetailClick}
           />
         </Grid>
       ))}

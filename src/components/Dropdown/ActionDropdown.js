@@ -26,7 +26,11 @@ function ActionDropdown(props) {
       onDeleteClick(clickedElement)
   }
 
-  const handleDetailClick = () => { }
+  const handleDetailClick = () => { 
+    handleCloseMenu()
+    if (onDetailClick)
+      onDetailClick(clickedElement)
+  }
 
   return (
     <>
@@ -53,20 +57,26 @@ function ActionDropdown(props) {
       >
         {
           onDetailClick &&
-          <MenuItem onClick={handleUpdateClick}>
-            <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
+          <MenuItem onClick={handleDetailClick}>
+            <Iconify icon={'majesticons:checkbox-list-detail-line'} sx={{ mr: 2 }} />
             Xem chi tiết
           </MenuItem>
         }
-        <MenuItem onClick={handleUpdateClick}>
-          <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-          Sửa 
-        </MenuItem>
+        {
+          onUpdateClick &&
+          <MenuItem onClick={handleUpdateClick}>
+            <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
+            Sửa
+          </MenuItem>
+        }
 
-        <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
-          <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
-          Xóa
-        </MenuItem>
+        {
+          onDeleteClick &&
+          <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
+            <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
+            Xóa
+          </MenuItem>
+        }
       </Popover>
     </>
   );

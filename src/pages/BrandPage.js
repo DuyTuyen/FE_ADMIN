@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 // @mui
 import { Container, Button, Stack, Typography } from '@mui/material';
 // components
-import { BrandList, BrandCartWidget } from '../sections/@dashboard/brand';
+import { BrandList } from '../sections/@dashboard/brand';
 import Iconify from '../components/iconify';
 
 import { brandAPI } from '../api/ConfigAPI';
@@ -152,7 +152,6 @@ export default function BrandPage() {
           onUpdateClick={handleUpdateFormShow}
           onDeleteClick={handleDeleteFormShow}
         />
-        <BrandCartWidget />
       </Container>
       <CreateBrandModal
         isShow={showCreateForm}

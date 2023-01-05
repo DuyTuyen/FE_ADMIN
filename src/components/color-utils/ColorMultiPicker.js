@@ -26,7 +26,7 @@ export default function ColorMultiPicker({ colors, selected, onChangeColor, sx, 
             value={color}
             color="default"
             checked={selected.includes(color)}
-            onChange={() => onChangeColor(color)}
+            onChange={(e) => onChangeColor(e.target.checked,color)}
             icon={<Icon whiteColor={whiteColor} />}
             checkedIcon={<Icon checked whiteColor={whiteColor} />}
             sx={{
