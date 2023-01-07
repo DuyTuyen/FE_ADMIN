@@ -112,12 +112,12 @@ const consignmentAPI = {
 }
 
 const protectedAPI = {
-  checkRoute: (token) => axi.get(`/protected/admin`,{
+  checkRoute: (token) => axi.get(`/protected/route/admin`,{
     headers: {
       "x-access-token": token
     }
   }),
-  checkAction: (token,permissions) => axi.get(`/protected/admin?permissions[]=${permissions}`,{
+  checkAction: (token,qPermissions) => axi.get(`/protected/action?${qPermissions}`,{
     headers: {
       "x-access-token": token
     }

@@ -17,9 +17,11 @@ import Loading from 'src/components/loading/Loading';
 import CreateBrandModal from 'src/sections/@dashboard/brand/CreateCategoryModal';
 import UpdateBrandModal from 'src/sections/@dashboard/brand/UpdateCategoryModal';
 import DeleteBrandModal from 'src/sections/@dashboard/brand/DeleteCategoryModal';
-
+import useProtectedAction from 'src/hooks/useProtectedAction';
+import PERMISSIONTYPE from '../enums/PermissionType'
 // ----------------------------------------------------------------------
 export default function BrandPage() {
+  const grantedPermissions = useProtectedAction([PERMISSIONTYPE.READ_BRAND, PERMISSIONTYPE.CREATE_BRAND, PERMISSIONTYPE.UPDATE_BRAND, PERMISSIONTYPE.DELETE_BRAND])
   const loading = useSelector((state) => state.loading.value);
 
   const dispatch = useDispatch();
@@ -135,23 +137,32 @@ export default function BrandPage() {
   ) : (
     <>
       <Helmet>
-        <title> Dashboard: Brand</title>
+        <title> Dashboard: Thương hiệu</title>
       </Helmet>
 
       <Container>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
-            BRAND
+            Thương hiệu
           </Typography>
-          <Button onClick={hanldeCreateFormShow} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
-            NEW BRAND
-          </Button>
+          {
+            grantedPermissions?.[PERMISSIONTYPE.CREATE_BRAND] &&
+            <Button onClick={hanldeCreateFormShow} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
+              Tạo mới
+            </Button>
+          }
+
         </Stack>
-        <BrandList
-          brands={brands}
-          onUpdateClick={handleUpdateFormShow}
-          onDeleteClick={handleDeleteFormShow}
-        />
+        {
+          grantedPermissions?.[PERMISSIONTYPE.READ_BRAND] ?
+            <BrandList
+              brands={brands}
+              onUpdateClick={handleUpdateFormShow}
+              onDeleteClick={handleDeleteFormShow}
+            /> :
+            <h1>Bạn không có quyền xem dữ liệu này</h1>
+        }
+
       </Container>
       <CreateBrandModal
         isShow={showCreateForm}
