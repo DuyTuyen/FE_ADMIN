@@ -64,13 +64,21 @@ const brandAPI = {
 };
 
 const userAPI = {
-  getAll: () => axi.get(`/user`),
+  getAll: () => axi.get(`/user/all`),
   login: (data) =>
     axi.post(`/user/login/admin`, data, {
       headers: {
         'Content-Type': `application/json`,
       },
     }),
+};
+
+const roleAPI = {
+  getAll: () => axi.get(`/role`),
+};
+
+const permissionAPI = {
+  getAll: () => axi.get(`/permission`),
 };
 
 const importOrderAPI = {
@@ -124,4 +132,4 @@ const protectedAPI = {
   })
 }
 
-export {protectedAPI ,statisticAPI, categoryAPI, productAPI, brandAPI, userAPI, productDetailAPI, importOrderAPI, orderAPI, notificationAPI,consignmentAPI };
+export {roleAPI, permissionAPI, protectedAPI ,statisticAPI, categoryAPI, productAPI, brandAPI, userAPI, productDetailAPI, importOrderAPI, orderAPI, notificationAPI,consignmentAPI };

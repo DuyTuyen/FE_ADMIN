@@ -16,6 +16,8 @@ import { protectedAPI } from './api/ConfigAPI';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import RolePage from './pages/RolePage';
+import PermissionPage from './pages/PermissionPage';
 // ----------------------------------------------------------------------
 
 export default function Router() {
@@ -69,6 +71,16 @@ export default function Router() {
             <ConsignmentPage />
           </ProtectedRoute>
         },
+        {
+          path: 'role', element: <ProtectedRoute>
+            <RolePage />
+          </ProtectedRoute>
+        },
+        {
+          path: 'permission', element: <ProtectedRoute>
+            <PermissionPage />
+          </ProtectedRoute>
+        },
       ],
     },
     {
@@ -93,14 +105,14 @@ export default function Router() {
 }
 
 function ProtectedRoute(props) {
-  const { permission, children } = props
+  const {  children } = props
   const [isAuthor, setIsAuthor] = useState(false)
   const token = useSelector(state => state.token.value)
   const navigate = useNavigate()
   useEffect(() => {
     async function checkRoute() {
       try {
-        const res = await protectedAPI.checkRoute(token)
+        await protectedAPI.checkRoute(token)
         setIsAuthor(true)
       } catch (error) {
         if (axios.isAxiosError(error))

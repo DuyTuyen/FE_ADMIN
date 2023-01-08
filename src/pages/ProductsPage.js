@@ -28,6 +28,7 @@ export default function ProductsPage() {
 
   const [openFilter, setOpenFilter] = useState(false);
   const [products, setProducts] = useState([])
+  
   const [categories, setCategories] = useState([])
   const [brands, setBrands] = useState([])
 

@@ -47,9 +47,14 @@ const navConfig = [
     icon: icon('ic_blog'),
   },
   {
-    title: 'login',
-    path: '/login',
-    icon: icon('ic_lock'),
+    title: 'Chức vụ',
+    path: '/dashboard/role',
+    icon: icon('ic_blog'),
+  },
+  {
+    title: 'Quyền hạn',
+    path: '/dashboard/permission',
+    icon: icon('ic_blog'),
   },
  
 ];
