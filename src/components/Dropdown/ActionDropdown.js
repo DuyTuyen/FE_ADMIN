@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Iconify from '../iconify/Iconify';
 
 function ActionDropdown(props) {
-  const { clickedElement, onUpdateClick, onDeleteClick, onDetailClick } = props;
+  const { clickedElement, onUpdateClick, onDeleteClick, onDetailClick, onUpdatePaymentStatus } = props;
   const [open, setOpen] = useState(null);
 
   const handleOpenMenu = (event) => {
@@ -32,6 +32,11 @@ function ActionDropdown(props) {
       onDetailClick(clickedElement)
   }
 
+   function handleUpdatePaymentClick() {
+     handleCloseMenu();
+     if (onUpdatePaymentStatus) onUpdatePaymentStatus(clickedElement);
+   }
+
   return (
     <>
       <IconButton size="large" color="inherit" onClick={handleOpenMenu}>
@@ -55,28 +60,31 @@ function ActionDropdown(props) {
           },
         }}
       >
-        {
-          onDetailClick &&
+        {onDetailClick && (
           <MenuItem onClick={handleDetailClick}>
             <Iconify icon={'majesticons:checkbox-list-detail-line'} sx={{ mr: 2 }} />
             Xem chi tiết
           </MenuItem>
-        }
-        {
-          onUpdateClick &&
+        )}
+        {onUpdateClick && (
           <MenuItem onClick={handleUpdateClick}>
             <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
             Sửa
           </MenuItem>
-        }
+        )}
 
-        {
-          onDeleteClick &&
+        {onDeleteClick && (
           <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
             <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
             Xóa
           </MenuItem>
-        }
+        )}
+        {onUpdatePaymentStatus && (
+          <MenuItem onClick={handleUpdatePaymentClick}>
+            <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
+            Xác nhận thanh toán
+          </MenuItem>
+        )}
       </Popover>
     </>
   );

@@ -17,6 +17,7 @@ import Loading from 'src/components/loading/Loading';
 import CreateCategoryModal from 'src/sections/@dashboard/categories/CreateCategoryModal';
 import DeleteCategoryModal from 'src/sections/@dashboard/categories/DeleteCategoryModal';
 import UpdateCategoryModal from 'src/sections/@dashboard/categories/UpdateCategoryModal';
+import { reject } from 'lodash';
 // ----------------------------------------------------------------------
 export default function CategoriesPage() {
   const loading = useSelector((state) => state.loading.value);
@@ -134,16 +135,16 @@ export default function CategoriesPage() {
   ) : (
     <>
       <Helmet>
-        <title> Dashboard: Categories</title>
+        <title> Dashboard: Loại</title>
       </Helmet>
 
       <Container>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
-            CATEGORIES
+            Loại
           </Typography>
           <Button onClick={hanldeCreateFormShow} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
-            NEW CATEGORIES
+            Tạo mới
           </Button>
         </Stack>
         <CategoryList

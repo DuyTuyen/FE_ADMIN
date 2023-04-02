@@ -43,6 +43,7 @@ function CreateImportOrderDetail(props) {
 
     function handleAddMoreProducts(e) {
         e.preventDefault()
+        console.log(size)
         if (onAddMoreDetail) {
             onAddMoreDetail({
                 _id: activeProductDetailId,

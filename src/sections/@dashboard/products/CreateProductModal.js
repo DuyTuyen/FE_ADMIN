@@ -39,7 +39,7 @@ function CreateProductModal(props) {
     return (
         <Modal style={{ zIndex: 10000 }} show={isShow} onHide={handleClose}>
             <Modal.Header closeButton>
-                <Modal.Title>Create Product</Modal.Title>
+                <Modal.Title>Thêm sản phẩm</Modal.Title>
             </Modal.Header>
             {errorMessage !== "" ?
                 errorMessage.split("---").map((err, index) => <Alert key={index} severity="error">{err}</Alert>) :
@@ -49,20 +49,20 @@ function CreateProductModal(props) {
 
                 <Modal.Body>
                     <Form.Group className="mb-3">
-                        <Form.Label>Name</Form.Label>
+                        <Form.Label>Tên</Form.Label>
                         <Form.Control name="name" type="text" placeholder="Type product name" />
                     </Form.Group>
                     <Form.Group className="mb-3">
-                        <Form.Label>Price</Form.Label>
+                        <Form.Label>Giá</Form.Label>
                         <Form.Control name="price" type="number" min="1" placeholder="Type product price (VND)" />
                     </Form.Group>
                     <Form.Group className="mb-3">
-                        <Form.Label>Description</Form.Label>
+                        <Form.Label>Mô tả</Form.Label>
                         <Form.Control name="des" type="text" placeholder="Type product description" />
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Category</Form.Label>
+                        <Form.Label>Loại</Form.Label>
                         <Form.Select name="r_category" aria-label="Select Category">
                             {
                                 categories.map(cate => (
@@ -72,7 +72,7 @@ function CreateProductModal(props) {
                         </Form.Select>
                     </Form.Group>
                     <Form.Group className="mb-3">
-                        <Form.Label>Brand</Form.Label>
+                        <Form.Label>Thương hiệu</Form.Label>
                         <Form.Select name="r_brand" aria-label="Select Brand">
                             {
                                 brands.map(brand => (

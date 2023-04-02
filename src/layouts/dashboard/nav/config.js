@@ -7,37 +7,37 @@ const icon = (name) => <SvgColor src={`/assets/icons/navbar/${name}.svg`} sx={{ 
 
 const navConfig = [
   {
-    title: 'dashboard',
+    title: 'Doanh thu',
     path: '/dashboard/app',
     icon: icon('ic_analytics'),
   },
   {
-    title: 'user',
+    title: 'Tài khoản',
     path: '/dashboard/user',
     icon: icon('ic_blog'),
   },
   {
-    title: 'product',
+    title: 'Sản phẩm',
     path: '/dashboard/products',
     icon: icon('ic_blog'),
   },
   {
-    title: 'category',
+    title: 'Loại',
     path: '/dashboard/category',
     icon: icon('ic_blog'),
   },
   {
-    title: 'brand',
+    title: 'Thương hiệu',
     path: '/dashboard/brand',
     icon: icon('ic_blog'),
   },
   {
-    title: 'importorder',
+    title: 'Nhập hàng',
     path: '/dashboard/importorder',
     icon: icon('ic_blog'),
   },
   {
-    title: 'order',
+    title: 'Đơn hàng',
     path: '/dashboard/order',
     icon: icon('ic_blog'),
   },
@@ -46,17 +46,16 @@ const navConfig = [
     path: '/dashboard/consignment',
     icon: icon('ic_blog'),
   },
-  {
-    title: 'Chức vụ',
-    path: '/dashboard/role',
-    icon: icon('ic_blog'),
-  },
-  {
-    title: 'Quyền hạn',
-    path: '/dashboard/permission',
-    icon: icon('ic_blog'),
-  },
- 
+  // {
+  //   title: 'Chức vụ',
+  //   path: '/dashboard/role',
+  //   icon: icon('ic_blog'),
+  // },
+  // {
+  //   title: 'Quyền hạn',
+  //   path: '/dashboard/permission',
+  //   icon: icon('ic_blog'),
+  // },
 ];
 
 export default navConfig;

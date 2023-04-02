@@ -6,7 +6,7 @@ import { Container, Button, Stack, Typography } from '@mui/material';
 import { ProductSort, ProductList, ProductFilterSidebar } from '../sections/@dashboard/products';
 import Iconify from '../components/iconify';
 
-import { brandAPI, categoryAPI, productAPI } from '../api/ConfigAPI';
+import { brandAPI, categoryAPI, productAPI, productDetailAPI } from '../api/ConfigAPI';
 /*eslint-disable */
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,6 +18,7 @@ import CreateProductModal from 'src/sections/@dashboard/products/CreateProductMo
 import UpdateProductModal from 'src/sections/@dashboard/products/UpdateProductModal';
 import DeleteProductModal from 'src/sections/@dashboard/products/DeleteProductModal';
 import ProductDetailModal from 'src/sections/@dashboard/products/ProductDetailModal';
+import CreateProductDetailModal from 'src/sections/@dashboard/products/CreateProductDetailModel';
 // ----------------------------------------------------------------------
 export default function ProductsPage() {
   const loading = useSelector(state => state.loading.value)
@@ -198,73 +199,89 @@ export default function ProductsPage() {
     setProducts(tempProducts)
   }
 
-  return (
-    loading ?
-      <Loading /> :
-      <>
-        <Helmet>
-          <title> Sản phẩm</title>
-        </Helmet>
+  async function handleCreateProductDetail(formData) {
+    try {
+      const res = await productDetailAPI.create(formData);
+      const foundProduct = products.find(p => p._id === clickedElement._id)
+  
+      const newProducts = [...products.filter(p => p._id !== clickedElement._id), foundProduct]
+      setProducts(newProducts)
+      setClickedElement({ ...clickedElement, r_productDetails: [...clickedElement.r_productDetails,res.data[0]]})
+    } catch (error) {
+      if (axios.isAxiosError(error))
+        dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
+      else dispatch(setErrorValue(error.toString()));
+    }
+  }
 
-        <Container>
-          <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-            <Typography variant="h4" gutterBottom>
-              Sản phẩm
-            </Typography>
-            <Button onClick={hanldeCreateFormShow} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
-              Tạo mới
-            </Button>
+  return loading ? (
+    <Loading />
+  ) : (
+    <>
+      <Helmet>
+        <title> Sản phẩm</title>
+      </Helmet>
+
+      <Container>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
+          <Typography variant="h4" gutterBottom>
+            Sản phẩm
+          </Typography>
+          <Button onClick={hanldeCreateFormShow} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
+            Tạo mới
+          </Button>
+        </Stack>
+        <Stack direction="row" flexWrap="wrap-reverse" alignItems="center" justifyContent="flex-end" sx={{ mb: 5 }}>
+          <Stack direction="row" spacing={1} flexShrink={0} sx={{ my: 1 }}>
+            <ProductFilterSidebar
+              openFilter={openFilter}
+              onOpenFilter={handleOpenFilter}
+              onCloseFilter={handleCloseFilter}
+              onFilter={filterProducts}
+            />
+            <ProductSort onSort={sortProducts} />
           </Stack>
-          <Stack direction="row" flexWrap="wrap-reverse" alignItems="center" justifyContent="flex-end" sx={{ mb: 5 }}>
-            <Stack direction="row" spacing={1} flexShrink={0} sx={{ my: 1 }}>
-              <ProductFilterSidebar
-                openFilter={openFilter}
-                onOpenFilter={handleOpenFilter}
-                onCloseFilter={handleCloseFilter}
-                onFilter={filterProducts}
-              />
-              <ProductSort 
-                onSort={sortProducts}
-              />
-            </Stack>
-          </Stack>
+        </Stack>
 
-          <ProductList
-            products={products}
-            onUpdateClick={handleUpdateFormShow}
-            onDeleteClick={handleDeleteFormShow}
-            onDetailClick={handleDetailModalShow}
-          />
-        </Container>
-        <CreateProductModal
-          isShow={showCreateForm}
-          onSubmit={(data) => { handleOnSubmitCreate(data) }}
-          onClose={() => handleCloseCreateFormShow()}
-          categories={categories}
-          brands={brands}
+        <ProductList
+          products={products}
+          onUpdateClick={handleUpdateFormShow}
+          onDeleteClick={handleDeleteFormShow}
+          onDetailClick={handleDetailModalShow}
         />
+      </Container>
+      <CreateProductModal
+        isShow={showCreateForm}
+        onSubmit={(data) => {
+          handleOnSubmitCreate(data);
+        }}
+        onClose={() => handleCloseCreateFormShow()}
+        categories={categories}
+        brands={brands}
+      />
 
-        <UpdateProductModal
-          isShow={showUpdateForm}
-          activeProduct={clickedElement}
-          onSubmit={(formData) => handleOnSubmitUpdate(formData)}
-          onClose={() => handleCloseUpdateFormShow()}
-          categories={categories}
-          brands={brands}
-        />
+      <UpdateProductModal
+        isShow={showUpdateForm}
+        activeProduct={clickedElement}
+        onSubmit={(formData) => handleOnSubmitUpdate(formData)}
+        onClose={() => handleCloseUpdateFormShow()}
+        categories={categories}
+        brands={brands}
+      />
 
-        <DeleteProductModal
-          isShow={showDeleteForm}
-          activeProduct={clickedElement}
-          onSubmit={() => handleOnSubmitDelete()}
-          onClose={() => handleCloseDeleteFormShow()}
-        />
+      <DeleteProductModal
+        isShow={showDeleteForm}
+        activeProduct={clickedElement}
+        onSubmit={() => handleOnSubmitDelete()}
+        onClose={() => handleCloseDeleteFormShow()}
+      />
 
-        <ProductDetailModal
-          isShow={showDetailModal}
-          product={clickedElement}
-          onClose={handleCloseDetailModalShow}
-        />
-      </>
+      <ProductDetailModal
+        isShow={showDetailModal}
+        product={clickedElement}
+        onClose={handleCloseDetailModalShow}
+        onCreateProductDetail={handleCreateProductDetail}
+      />
+    </>
   );
 }

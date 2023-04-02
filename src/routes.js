@@ -31,55 +31,55 @@ export default function Router() {
         { element: <Navigate to="/dashboard/app" />, index: true },
         {
           path: 'app',
-          element: <ProtectedRoute>
+          element: 
             <DashboardAppPage />
-          </ProtectedRoute>
+          
         },
         {
           path: 'user',
-          element: <ProtectedRoute>
+          element: 
             <UserPage />
-          </ProtectedRoute>
+          
         },
         {
-          path: 'products', element: <ProtectedRoute>
+          path: 'products', element: 
             <ProductsPage />
-          </ProtectedRoute>
+          
         },
         {
-          path: 'category', element: <ProtectedRoute>
+          path: 'category', element: 
             <CategoryPage />
-          </ProtectedRoute>
+          
         },
         {
-          path: 'brand', element: <ProtectedRoute>
+          path: 'brand', element: 
             <BrandPage />
-          </ProtectedRoute>
+          
         },
         {
-          path: 'importorder', element: <ProtectedRoute>
+          path: 'importorder', element: 
             <ImportOrderPage />
-          </ProtectedRoute>
+          
         },
         {
-          path: 'order', element: <ProtectedRoute>
+          path: 'order', element: 
             <OrderPage />
-          </ProtectedRoute>
+          
         },
         {
-          path: 'consignment', element: <ProtectedRoute>
+          path: 'consignment', element: 
             <ConsignmentPage />
-          </ProtectedRoute>
+          
         },
         {
-          path: 'role', element: <ProtectedRoute>
+          path: 'role', element: 
             <RolePage />
-          </ProtectedRoute>
+          
         },
         {
-          path: 'permission', element: <ProtectedRoute>
+          path: 'permission', element: 
             <PermissionPage />
-          </ProtectedRoute>
+          
         },
       ],
     },
@@ -103,29 +103,4 @@ export default function Router() {
 
   return routes;
 }
-
-function ProtectedRoute(props) {
-  const {  children } = props
-  const [isAuthor, setIsAuthor] = useState(false)
-  const token = useSelector(state => state.token.value)
-  const navigate = useNavigate()
-  useEffect(() => {
-    async function checkRoute() {
-      try {
-        await protectedAPI.checkRoute(token)
-        setIsAuthor(true)
-      } catch (error) {
-        if (axios.isAxiosError(error))
-          alert((error.response ? error.response.data.message : error.message));
-        else
-          alert((error.toString()));
-        navigate("/login")
-      }
-    }
-    checkRoute()
-  }, [children])
-
-  return (
-    isAuthor && children 
-  );
-}   
+ 

@@ -21,7 +21,6 @@ import useProtectedAction from 'src/hooks/useProtectedAction';
 import PERMISSIONTYPE from '../enums/PermissionType'
 // ----------------------------------------------------------------------
 export default function BrandPage() {
-  const grantedPermissions = useProtectedAction([PERMISSIONTYPE.READ_BRAND, PERMISSIONTYPE.CREATE_BRAND, PERMISSIONTYPE.UPDATE_BRAND, PERMISSIONTYPE.DELETE_BRAND])
   const loading = useSelector((state) => state.loading.value);
 
   const dispatch = useDispatch();
@@ -87,7 +86,7 @@ export default function BrandPage() {
     try {
       const res = await brandAPI.create(formData);
       const newBrands = [...brands];
-      newBrands.unshift(res.data);
+      newBrands.unshift(res.data[0]);
       setBrands(newBrands);
     } catch (error) {
       if (axios.isAxiosError(error))
@@ -145,24 +144,15 @@ export default function BrandPage() {
           <Typography variant="h4" gutterBottom>
             Thương hiệu
           </Typography>
-          {
-            grantedPermissions?.[PERMISSIONTYPE.CREATE_BRAND] &&
             <Button onClick={hanldeCreateFormShow} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
               Tạo mới
             </Button>
-          }
-
         </Stack>
-        {
-          grantedPermissions?.[PERMISSIONTYPE.READ_BRAND] ?
             <BrandList
               brands={brands}
               onUpdateClick={handleUpdateFormShow}
               onDeleteClick={handleDeleteFormShow}
-            /> :
-            <h1>Bạn không có quyền xem dữ liệu này</h1>
-        }
-
+            /> 
       </Container>
       <CreateBrandModal
         isShow={showCreateForm}

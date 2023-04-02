@@ -46,6 +46,7 @@ const TABLE_HEAD = [
   { id: 'address', label: 'Địa chỉ', alignRight: false },
   { id: 'email', label: 'Email', alignRight: false },
   { id: 'role', label: 'Chức vụ', alignRight: false },
+  { id: 'name', label: 'ten va sdt', alignRight: false },
 ];
 
 // ----------------------------------------------------------------------
@@ -128,20 +129,16 @@ export default function UserPage() {
   return (
     <>
       <Helmet>
-        <title> User | Minimal UI </title>
+        <title> Tài khoản | Minimal UI </title>
       </Helmet>
 
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
         <Typography variant="h4" gutterBottom>
-          USER
+          Tài khoản
         </Typography>
-        <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
-          NEW USER
-        </Button>
       </Stack>
 
       <Card>
-
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800 }}>
             <Table>
@@ -166,7 +163,6 @@ export default function UserPage() {
 
                       <TableCell component="th" scope="row" padding="none">
                         <Stack direction="row" alignItems="center" spacing={2}>
-                          <Avatar alt={name} />
                           <Typography variant="subtitle2" noWrap>
                             {name}
                           </Typography>
@@ -179,16 +175,10 @@ export default function UserPage() {
 
                       <TableCell align="left">{email}</TableCell>
                       <TableCell align="left">{r_role?.title}</TableCell>
-
-                      <TableCell align="right">
-                        <IconButton size="large" color="inherit" onClick={handleOpenMenu}>
-                          <Iconify icon={'eva:more-vertical-fill'} />
-                        </IconButton>
-                      </TableCell>
+                      <TableCell align='left'>{name}{phone}</TableCell>
                     </TableRow>
                   );
                 })}
-
               </TableBody>
             </Table>
           </TableContainer>

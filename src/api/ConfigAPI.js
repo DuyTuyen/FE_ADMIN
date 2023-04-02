@@ -44,6 +44,11 @@ const productDetailAPI = {
         'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
       },
     }),
+  create: (formData) => axi.post('/productDetail',formData, {
+      headers: {
+        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+      },
+    }),
 };
 
 const brandAPI = {
@@ -93,11 +98,25 @@ const importOrderAPI = {
 
 const orderAPI = {
   getAll: () => axi.get(`/order`),
-  update: (data) => axi.put(`/order/${data.id}`,{status: data.status},{
-    headers: {
-      'Content-Type': `application/json`,
-    },
-  })
+  update: (data) =>
+    axi.put(
+      `/order/${data.id}`,
+      { status: data.status },
+      {
+        headers: {
+          'Content-Type': `application/json`,
+        },
+      }
+    ),
+  updatePaymentStatus: (id) =>
+    axi.put(
+      `/order/payment-status/${id}`,
+      {
+        headers: {
+          'Content-Type': `application/json`,
+        },
+      }
+    ),
 };
 
 const statisticAPI = {

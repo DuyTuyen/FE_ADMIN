@@ -97,7 +97,7 @@ export default function ImportOrderPage() {
       <Loading /> :
       <>
         <Helmet>
-          <title> ImportOrder | Minimal UI </title>
+          <title> Đơn nhập hàng | Minimal UI </title>
         </Helmet>
 
           <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
