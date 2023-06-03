@@ -52,20 +52,20 @@ const productDetailAPI = {
 };
 
 const brandAPI = {
-  getAll: () => axi.get(`/brand`),
+  getAll: () => axi.get(`/v1/admin/brand`),
   create: (formData) =>
-    axi.post(`/brand`, formData, {
+    axi.post(`/v1/admin/brand`, formData, {
       headers: {
         'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
       },
     }),
   update: (id, formData) =>
-    axi.put(`/brand/${id}`, formData, {
+    axi.put(`/v1/admin/brand/${id}`, formData, {
       headers: {
         'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
       },
     }),
-  delete: (id) => axi.delete(`/brand/${id}`),
+  delete: (id) => axi.delete(`/v1/admin/brand/${id}`),
 };
 
 const userAPI = {

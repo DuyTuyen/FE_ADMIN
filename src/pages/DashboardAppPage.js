@@ -12,6 +12,8 @@ import { useNavigate } from 'react-router-dom';
 import { statisticAPI } from 'src/api/ConfigAPI';
 import Loading from 'src/components/loading/Loading';
 import MONTHS from '../enums/months'
+import revenue from '../_mock/revenue'
+import topProducts from '../_mock/topProduct'
 // components
 // sections
 
@@ -23,32 +25,32 @@ export default function DashboardAppPage() {
       loading: state.loading.value
     }
   })
-  const [myRevenue, setMyRevenue] = useState(null)
-  const [topSoldProducts, setTopSoldProducts] = useState([])
+  const [myRevenue, setMyRevenue] = useState(revenue)
+  const [topSoldProducts, setTopSoldProducts] = useState(topProducts)
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  useEffect(() => {
-    dispatch(showLoading());
-    Promise.all([statisticAPI.getRevenue(), statisticAPI.getTopSoldProducts()])
-      .then((results) => {
-        const data = results[0].data
-        const revenue = Object.values(data.revenue)
-        const costPrice = Object.values(data.costPrice)
-        const gap = Object.values(data.gap)
-        setMyRevenue({ revenue, costPrice, gap });
-        setTopSoldProducts(results[1].data)
-      })
-      .catch((error) => {
-        if (axios.isAxiosError(error))
-          dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
-        else dispatch(setErrorValue(error.toString()));
-        navigate("/error")
-      })
-      .finally(() => {
-        dispatch(closeLoading());
-      })
-  }, [])
+  // useEffect(() => {
+  //   dispatch(showLoading());
+  //   Promise.all([statisticAPI.getRevenue(), statisticAPI.getTopSoldProducts()])
+  //     .then((results) => {
+  //       const data = results[0].data
+  //       const revenue = Object.values(data.revenue)
+  //       const costPrice = Object.values(data.costPrice)
+  //       const gap = Object.values(data.gap)
+  //       setMyRevenue({ revenue, costPrice, gap });
+  //       setTopSoldProducts(results[1].data)
+  //     })
+  //     .catch((error) => {
+  //       if (axios.isAxiosError(error))
+  //         dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
+  //       else dispatch(setErrorValue(error.toString()));
+  //       navigate("/error")
+  //     })
+  //     .finally(() => {
+  //       dispatch(closeLoading());
+  //     })
+  // }, [])
 
   return (
     loading ?

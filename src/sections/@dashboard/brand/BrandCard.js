@@ -46,7 +46,7 @@ export default function BrandCard({ brand, onUpdateClick, onDeleteClick }) {
         )}
         <StyledBrandImg
           alt={brand.name}
-          src={`${process.env.REACT_APP_CLOUDINARYURL}${brand.img}`}
+          src={`${brand.image}`}
         />
       </Box>
 

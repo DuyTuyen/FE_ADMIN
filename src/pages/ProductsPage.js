@@ -28,7 +28,7 @@ export default function ProductsPage() {
   const navigate = useNavigate()
 
   const [openFilter, setOpenFilter] = useState(false);
-  const [products, setProducts] = useState([])
+  const [products, setProducts] = useState([{}])
   
   const [categories, setCategories] = useState([])
   const [brands, setBrands] = useState([])
@@ -86,25 +86,25 @@ export default function ProductsPage() {
     setShowDetailModal(false)
   }
 
-  useEffect(() => {
-    dispatch(showLoading())
-    Promise.all([brandAPI.getAll(), categoryAPI.getAll(), productAPI.getAll()])
-      .then((results) => {
-        setBrands(results[0].data)
-        setCategories(results[1].data)
-        setProducts(results[2].data)
-      })
-      .catch(error => {
-        if (axios.isAxiosError(error))
-          dispatch(setErrorValue(error.response ? error.response.data.message : error.message))
-        else
-          dispatch(setErrorValue(error.toString()))
-        navigate("/error")
-      })
-      .finally(() => {
-        dispatch(closeLoading())
-      })
-  }, [])
+  // useEffect(() => {
+  //   dispatch(showLoading())
+  //   Promise.all([brandAPI.getAll(), categoryAPI.getAll(), productAPI.getAll()])
+  //     .then((results) => {
+  //       setBrands(results[0].data)
+  //       setCategories(results[1].data)
+  //       setProducts(results[2].data)
+  //     })
+  //     .catch(error => {
+  //       if (axios.isAxiosError(error))
+  //         dispatch(setErrorValue(error.response ? error.response.data.message : error.message))
+  //       else
+  //         dispatch(setErrorValue(error.toString()))
+  //       navigate("/error")
+  //     })
+  //     .finally(() => {
+  //       dispatch(closeLoading())
+  //     })
+  // }, [])
 
   async function handleOnSubmitCreate(data) {
     setShowCreateForm(false)
@@ -260,7 +260,7 @@ export default function ProductsPage() {
         brands={brands}
       />
 
-      <UpdateProductModal
+      {/* <UpdateProductModal
         isShow={showUpdateForm}
         activeProduct={clickedElement}
         onSubmit={(formData) => handleOnSubmitUpdate(formData)}
@@ -274,11 +274,11 @@ export default function ProductsPage() {
         activeProduct={clickedElement}
         onSubmit={() => handleOnSubmitDelete()}
         onClose={() => handleCloseDeleteFormShow()}
-      />
+      /> */}
 
       <ProductDetailModal
         isShow={showDetailModal}
-        product={clickedElement}
+        product={{}}
         onClose={handleCloseDetailModalShow}
         onCreateProductDetail={handleCreateProductDetail}
       />

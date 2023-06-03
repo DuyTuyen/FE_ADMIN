@@ -43,12 +43,12 @@ export default function DashboardLayout() {
     }
   })
 
-  useEffect(() => {
-    if(!token){
-      alert("Bạn phải đăng nhập trước khi vào")
-      navigate("/login")
-    }
-  },[token])
+  // useEffect(() => {
+  //   if(!token){
+  //     alert("Bạn phải đăng nhập trước khi vào")
+  //     navigate("/login")
+  //   }
+  // },[token])
 
   return (
     <StyledRoot>

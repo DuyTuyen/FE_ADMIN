@@ -45,14 +45,14 @@ export default function ShopProductCard({ product, onUpdateClick, onDeleteClick,
             {product.active}
           </Label>
         )}
-        <StyledProductImg alt={product.name} src={`${process.env.REACT_APP_CLOUDINARYURL}${product.r_productDetails[0]?.img}`} />
+        <StyledProductImg alt={'mi'} src={`https://technova.com.vn/wp-content/uploads/2019/10/team.jpg`} />
       </Box>
 
       <Stack spacing={2} sx={{ p: 3 }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Link color="inherit" underline="hover" style={{ cursor: "pointer" }}>
             <Typography variant="subtitle2" noWrap>
-              {product.name}
+              Microsoft Team
             </Typography>
           </Link>
           <ActionDropdown 
@@ -64,9 +64,7 @@ export default function ShopProductCard({ product, onUpdateClick, onDeleteClick,
         </Stack>
 
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <ColorPreview colors={product.r_productDetails.map(detail => detail.color)} />
           <Typography variant="subtitle1">
-            {fCurrency(product.price)}
           </Typography>
         </Stack>
       </Stack>

@@ -29,9 +29,9 @@ function UpdateBrandModal(props) {
   return (
     <Modal style={{ zIndex: 9999 }} show={isShow} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Update Brand</Modal.Title>
+        <Modal.Title>Cập nhật</Modal.Title>
       </Modal.Header>
-      {errorMessage !== '' ? (
+      {/* {errorMessage !== '' ? (
         errorMessage.split('---').map((err, index) => (
           <Alert key={index} severity="error">
             {err}
@@ -39,11 +39,11 @@ function UpdateBrandModal(props) {
         ))
       ) : (
         <></>
-      )}
+      )} */}
       <Form onSubmit={handleUpdateBrand}>
         <Modal.Body>
           <Form.Group className="mb-3">
-            <Form.Label>Name</Form.Label>
+            <Form.Label>Tên thương hiệu</Form.Label>
             <Form.Control
               defaultValue={activeBrand?.name}
               name="name"
@@ -52,7 +52,7 @@ function UpdateBrandModal(props) {
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Price</Form.Label>
+            <Form.Label>Hình ảnh</Form.Label>
             <Form.Control
               name="img"
               type="file"
@@ -61,7 +61,7 @@ function UpdateBrandModal(props) {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="primary" type="submit">
-            Update
+            Cập nhật
           </Button>
         </Modal.Footer>
       </Form>

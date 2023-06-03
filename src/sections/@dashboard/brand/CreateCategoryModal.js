@@ -29,9 +29,9 @@ function CreateBrandModal(props) {
   return (
     <Modal style={{ zIndex: 10000 }} show={isShow} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Create Brand</Modal.Title>
+        <Modal.Title>Tạo thương hiệu</Modal.Title>
       </Modal.Header>
-      {errorMessage !== '' ? (
+      {/* {errorMessage !== '' ? (
         errorMessage.split('---').map((err, index) => (
           <Alert key={index} severity="error">
             {err}
@@ -39,21 +39,21 @@ function CreateBrandModal(props) {
         ))
       ) : (
         <></>
-      )}
+      )} */}
       <Form onSubmit={handleCreateBrand}>
         <Modal.Body>
           <Form.Group className="mb-3">
-            <Form.Label>Name</Form.Label>
+            <Form.Label>Tên thương hiệu</Form.Label>
             <Form.Control name="name" type="text" placeholder="Type Brand name" />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Image</Form.Label>
+            <Form.Label>Hình ảnh</Form.Label>
             <Form.Control name="img" type="file" min="1" placeholder="Select image" />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="primary" type="submit">
-            Create
+            Tạo
           </Button>
         </Modal.Footer>
       </Form>

@@ -24,16 +24,16 @@ function DeleteBrandModal(props) {
   return (
     <Modal style={{ zIndex: 9999 }} show={isShow} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Are you sure to delete {activeBrand?.name}</Modal.Title>
+        <Modal.Title>Bnạ có chắc muốn xoá {activeBrand?.name}</Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={handleDeleteBrand}>
         <Modal.Footer>
           <Button variant="primary" type="submit">
-            Delete
+            Xoá
           </Button>
           <Button variant="danger" onClick={handleClose}>
-            Cancle
+            Huỷ
           </Button>
         </Modal.Footer>
       </Form>

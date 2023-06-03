@@ -7,6 +7,7 @@ import { useState } from 'react';
 import Iconify from 'src/components/iconify/Iconify';
 import CreateProductDetailModal from './CreateProductDetailModel';
 import Color from 'src/enums/Color';
+import { DEFAULT_ATTRIBUTE } from '@mui/system/cssVars/getInitColorSchemeScript';
 
 ProductDetailModal.propTypes = {
     isShow: PropTypes.bool,
@@ -15,13 +16,14 @@ ProductDetailModal.propTypes = {
 };
 
 function ProductDetailModal(props) {
-
+  
     const { isShow, onClose, product, onCreateProductDetail } = props
     const [isShowCreateDetailModal, setIsShowCreateDetailModal] = useState(false)
 
     function handleClose() {
         if (onClose)
             onClose()
+
   }
   
   function handleCreateProductDetail(formData) {
@@ -35,9 +37,7 @@ function ProductDetailModal(props) {
         <Modal size="xl" style={{ zIndex: 10000 }} show={isShow} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>{product?.name}</Modal.Title>
-            <Button onClick={() => {setIsShowCreateDetailModal(true)}} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
-              Tạo mới
-            </Button>
+              Các gói sản phẩm
           </Modal.Header>
           <Modal.Body>
             <Card>
@@ -46,40 +46,43 @@ function ProductDetailModal(props) {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell>Mã định danh</TableCell>
-                        <TableCell>Màu sắc</TableCell>
-                        <TableCell>Hình ảnh</TableCell>
-                        <TableCell>Số lượng</TableCell>
+                      <TableCell></TableCell>
+                        <TableCell>Free</TableCell>
+                        <TableCell>O365 Business Premium</TableCell>
+                        <TableCell>Office 365 E3</TableCell>
+                        <TableCell>
+                          <Button onClick={() => {setIsShowCreateDetailModal(true)}} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
+                            Thêm gói
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {product?.r_productDetails.map((detail) => {
-                        return (
-                          <TableRow key={detail._id}>
-                            <TableCell align="left">{detail._id}</TableCell>
-                            <TableCell align="left">{Color[detail.color]}</TableCell>
+                          <TableRow >
+                            <TableCell align="left">Tin nhắn và tìm kiếm không giới hạn</TableCell>
+                            <TableCell align="left">v</TableCell>
+                            <TableCell align="left">v</TableCell>
+                            <TableCell align="left">v</TableCell>
+                          </TableRow>
+                          <TableRow >
+                            <TableCell align="left">Số lượng người dùng tối đa</TableCell>
+                            <TableCell align="left">300</TableCell>
+                            <TableCell align="left">300</TableCell>
+                            <TableCell align="left">Không giới hạn</TableCell>
+                          </TableRow>
+                          <TableRow >
+                            <TableCell align="left">Giá(VND)</TableCell>
+                            <TableCell align="left">miễn phí</TableCell>
+                            <TableCell align="left">400.000VND/tháng</TableCell>
+                            <TableCell align="left">600.000VND/tháng</TableCell>
+                          </TableRow>
+                          <TableRow >
                             <TableCell align="left">
-                              <img
-                                src={`${process.env.REACT_APP_CLOUDINARYURL}${detail.img}`}
-                                style={{ width: 100, height: 100 }}
-                              />
-                            </TableCell>
-                            <TableCell align="left">
-                              <Form.Select aria-label="Default select example">
-                                {detail.r_consignments?.length > 0 ? (
-                                  detail.r_consignments?.map((c) => (
-                                    <option key={c._id}>
-                                      kích cỡ {c.size} còn {c.quantity} sản phẩm
-                                    </option>
-                                  ))
-                                ) : (
-                                  <option>Không còn sản phẩm nào trong kho</option>
-                                )}
-                              </Form.Select>
+                                <Button onClick={() => {setIsShowCreateDetailModal(true)}} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
+                                Thêm quyền lợi mới (+)
+                              </Button>
                             </TableCell>
                           </TableRow>
-                        );
-                      })}
                     </TableBody>
                   </Table>
                 </TableContainer>

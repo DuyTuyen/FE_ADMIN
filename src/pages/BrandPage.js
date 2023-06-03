@@ -17,8 +17,7 @@ import Loading from 'src/components/loading/Loading';
 import CreateBrandModal from 'src/sections/@dashboard/brand/CreateCategoryModal';
 import UpdateBrandModal from 'src/sections/@dashboard/brand/UpdateCategoryModal';
 import DeleteBrandModal from 'src/sections/@dashboard/brand/DeleteCategoryModal';
-import useProtectedAction from 'src/hooks/useProtectedAction';
-import PERMISSIONTYPE from '../enums/PermissionType'
+import brand from '../_mock/brand';
 // ----------------------------------------------------------------------
 export default function BrandPage() {
   const loading = useSelector((state) => state.loading.value);
@@ -27,7 +26,7 @@ export default function BrandPage() {
 
   const navigate = useNavigate();
 
-  const [brands, setBrands] = useState([]);
+  const [brands, setBrands] = useState(brand);
 
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -63,22 +62,22 @@ export default function BrandPage() {
     setShowDeleteForm(false);
   }
 
-  useEffect(() => {
-    async function getBrands() {
-      dispatch(showLoading());
-      try {
-        const res = await brandAPI.getAll();
-        setBrands(res.data);
-      } catch (error) {
-        if (axios.isAxiosError(error))
-          dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
-        else dispatch(setErrorValue(error.toString()));
-      } finally {
-        dispatch(closeLoading());
-      }
-    }
-    getBrands();
-  }, []);
+  // useEffect(() => {
+  //   async function getBrands() {
+  //     dispatch(showLoading());
+  //     try {
+  //       const res = await brandAPI.getAll();
+  //       setBrands(res.data);
+  //     } catch (error) {
+  //       if (axios.isAxiosError(error))
+  //         dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
+  //       else dispatch(setErrorValue(error.toString()));
+  //     } finally {
+  //       dispatch(closeLoading());
+  //     }
+  //   }
+  //   getBrands();
+  // }, []);
 
   async function handleOnSubmitCreate(formData) {
     setShowCreateForm(false);

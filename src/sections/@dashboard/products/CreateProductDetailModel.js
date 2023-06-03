@@ -52,16 +52,9 @@ function CreateProductDetailModal(props) {
       <Form onSubmit={handleCreateProductDetail}>
         <Modal.Body>
           <Form.Group className="mb-3">
-            <Form.Label>Màu</Form.Label>
+            <Form.Label>Tên gói</Form.Label>
             <Form.Group className="mb-3">
-              <Form.Label>Thương hiệu</Form.Label>
-              <Form.Select name="color" aria-label="Select Brand">
-                {Object.keys(Color).map((color, index) => (
-                  <option key={index} value={color}>
-                    {Color[color]}
-                  </option>
-                ))}
-              </Form.Select>
+              <Form.Label></Form.Label>
             </Form.Group>{' '}
           </Form.Group>
           <Form.Group className="mb-3">
