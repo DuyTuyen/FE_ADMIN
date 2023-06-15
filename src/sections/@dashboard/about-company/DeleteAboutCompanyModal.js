@@ -2,38 +2,38 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Form, Button } from 'react-bootstrap';
 
-DeleteCategoryModal.propTypes = {
+DeleteAboutCompanyModal.propTypes = {
   isShow: PropTypes.bool,
   onClose: PropTypes.func,
   onSubmit: PropTypes.func,
-  activeCategory: PropTypes.object,
+  activeAboutCompany: PropTypes.object,
 };
 
-function DeleteCategoryModal(props) {
-  const { isShow, onClose, onSubmit, activeCategory } = props;
+function DeleteAboutCompanyModal(props) {
+  const { isShow, onClose, onSubmit, activeAboutCompany } = props;
 
   function handleClose() {
     if (onClose) onClose();
   }
 
-  function handleDeleteCategory(e) {
+  function handleDeleteAboutCompany(e) {
     e.preventDefault();
-    if (onSubmit) onSubmit(activeCategory.id);
+    if (onSubmit) onSubmit(activeAboutCompany.id);
   }
 
   return (
     <Modal style={{ zIndex: 9999 }} show={isShow} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Are you sure to delete {activeCategory?.name}</Modal.Title>
+        <Modal.Title>Bạn có chắc muốn xoá {activeAboutCompany?.name}</Modal.Title>
       </Modal.Header>
 
-      <Form onSubmit={handleDeleteCategory}>
+      <Form onSubmit={handleDeleteAboutCompany}>
         <Modal.Footer>
           <Button variant="primary" type="submit">
-            Delete
+            Xoá
           </Button>
           <Button variant="danger" onClick={handleClose}>
-            Cancle
+            Huỷ
           </Button>
         </Modal.Footer>
       </Form>
@@ -41,4 +41,4 @@ function DeleteCategoryModal(props) {
   );
 }
 
-export default DeleteCategoryModal;
+export default DeleteAboutCompanyModal;

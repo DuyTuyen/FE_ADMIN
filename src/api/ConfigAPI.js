@@ -1,75 +1,73 @@
 import axios from 'axios'
 
 const axi = axios.create({
-  baseURL: `http://127.0.0.1:3003`,
+  baseURL: `http://127.0.0.1:3000`,
 });
-const categoryAPI = {
-  getAll: () => axi.get(`/category`),
+
+const imageAPI = {
   create: (formData) =>
-    axi.post(`/category`, formData, {
+    axi.post(`/v1/image`, formData, {
       headers: {
         'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
       },
     }),
-  update: (id, formData) =>
-    axi.put(`/category/${id}`, formData, {
+    delete: (id) => axi.delete(`/v1/image/${id}`), 
+}
+const categoryAPI = {
+  getAll: () => axi.get(`/v1/category?queryType=activate`),
+  create: (createCategory) =>
+    axi.post(`/v1/category`, createCategory, {
       headers: {
-        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+        'Content-Type': `application/json`,
       },
     }),
-  delete: (id) => axi.delete(`/category/${id}`),
+  update: (id, updateCategory) =>
+    axi.put(`/v1/category/${id}`, updateCategory, {
+      headers: {
+        'Content-Type': `application/json`,
+      },
+    }),
+  delete: (id) => axi.delete(`/v1/category/${id}`),
 };
 const productAPI = {
-  getAll: () => axi.get(`/product/admin`),
-  filter: (myFilter) => axi.get(`/product/admin?${myFilter}`),
-  create: (data) =>
-    axi.post(`/product`, data, {
+  getAll: () => axi.get(`/v1/product/?queryType=activate`),
+  create: (createProduct) =>
+    axi.post(`/v1/product`, createProduct, {
       headers: {
         'Content-Type': `application/json`,
       },
     }),
-  update: (data) =>
-    axi.put(`/product/${data.id}`, data, {
+  update: (updateProduct) =>
+    axi.put(`/v1/product/${updateProduct.id}`, updateProduct, {
       headers: {
         'Content-Type': `application/json`,
       },
     }),
-  delete: (id) => axi.delete(`/product/${id}`)
-};
+  delete: (id) => axi.delete(`/v1/product/${id}`),
+  getPackages: (id) => axi.get(`/v1/product/${id}/package`),
+  getBenefits: (id) => axi.get(`/v1/product/${id}/benefit`),
 
-const productDetailAPI = {
-  update: (id, formData) =>
-    axi.put(`/productDetail/${id}`, formData, {
-      headers: {
-        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
-      },
-    }),
-  create: (formData) => axi.post('/productDetail',formData, {
-      headers: {
-        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
-      },
-    }),
 };
 
 const brandAPI = {
-  getAll: () => axi.get(`/v1/admin/brand`),
-  create: (formData) =>
-    axi.post(`/v1/admin/brand`, formData, {
+  getAll: () => axi.get(`/v1/brand?queryType=activate`),
+  create: (createBrand) =>
+    axi.post(`/v1/brand`, createBrand, {
       headers: {
-        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+        'Content-Type': `application/json`,
       },
     }),
-  update: (id, formData) =>
-    axi.put(`/v1/admin/brand/${id}`, formData, {
+  update: (id, updateBrand) =>
+    axi.put(`/v1/brand/${id}`, updateBrand, {
       headers: {
-        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+        'Content-Type': `application/json`,
       },
     }),
-  delete: (id) => axi.delete(`/v1/admin/brand/${id}`),
+  delete: (id) => axi.delete(`/v1/brand/${id}`),
 };
 
 const userAPI = {
-  getAll: () => axi.get(`/user/all`),
+  getAll: () => axi.get(`/user/activate`),
   login: (data) =>
     axi.post(`/user/login/admin`, data, {
       headers: {
@@ -78,77 +76,94 @@ const userAPI = {
     }),
 };
 
-const roleAPI = {
-  getAll: () => axi.get(`/role`),
-};
-
-const permissionAPI = {
-  getAll: () => axi.get(`/permission`),
-};
-
-const importOrderAPI = {
-  getAll: () => axi.get(`/importorder`),
-  create: (data) =>
-    axi.post(`/importorder`, data, {
+const productPackageAPI = {
+  create: (createProductPackage) =>
+    axi.post(`/v1/product-package`, createProductPackage, {
       headers: {
         'Content-Type': `application/json`,
       },
     }),
 };
 
-const orderAPI = {
-  getAll: () => axi.get(`/order`),
-  update: (data) =>
-    axi.put(
-      `/order/${data.id}`,
-      { status: data.status },
-      {
-        headers: {
-          'Content-Type': `application/json`,
-        },
-      }
-    ),
-  updatePaymentStatus: (id) =>
-    axi.put(
-      `/order/payment-status/${id}`,
-      {
-        headers: {
-          'Content-Type': `application/json`,
-        },
-      }
-    ),
+const productBenefitAPI = {
+  create: (createProductBenefit) =>
+    axi.post(`/v1/product-benefit`, createProductBenefit, {
+      headers: {
+        'Content-Type': `application/json`,
+      },
+    }),
 };
 
-const statisticAPI = {
-  getRevenue: () => axi.get(`/statistic/revenue`),
-  getTopSoldProducts: () => axi.get(`/statistic/topSoldProduct`)
+const benefitValueAPI = {
+  update: (id, updateBenefitValue) =>
+    axi.put(`/v1/benefit-value/${id}`, updateBenefitValue, {
+      headers: {
+        'Content-Type': `application/json`,
+      },
+    }),
 }
 
-const notificationAPI = {
-  getAll: () => axi.get(`/notification/admin`),
-  updateIsRead: (id) => axi.put(`/notification/${id}`)
-}
+const newsAPI = {
+  getAll: () => axi.get(`/v1/news?queryType=activate`),
+  create: (createNews) =>
+    axi.post(`/v1/news`, createNews, {
+      headers: {
+        'Content-Type': `application/json`,
+      },
+    }),
+  update: (updateNews) =>
+    axi.put(`/v1/news/${updateNews.id}`, updateNews, {
+      headers: {
+        'Content-Type': `application/json`,
+      },
+    }),
+  delete: (id) => axi.delete(`/v1/news/${id}`),
+};
 
-const consignmentAPI = {
-  getAll: () => axi.get(`/consignment`),
-  updateStatus: ({id,status}) => axi.put(`/consignment/${id}`,{status},{
-    headers: {
-      'Content-Type': `application/json`,
-    },
-  })
-}
+const aboutCompanyAPI = {
+  getAll: () => axi.get(`/v1/about-company?queryType=activate`),
+  create: (createAboutCompany) =>
+    axi.post(`/v1/about-company`, createAboutCompany, {
+      headers: {
+        'Content-Type': `application/json`,
+      },
+    }),
+  update: (updateAboutCompany) =>
+    axi.put(`/v1/about-company/${updateAboutCompany.id}`, updateAboutCompany, {
+      headers: {
+        'Content-Type': `application/json`,
+      },
+    }),
+  delete: (id) => axi.delete(`/v1/about-company/${id}`),
+};
 
-const protectedAPI = {
-  checkRoute: (token) => axi.get(`/protected/route/admin`,{
-    headers: {
-      "x-access-token": token
-    }
-  }),
-  checkAction: (token,qPermissions) => axi.get(`/protected/action?${qPermissions}`,{
-    headers: {
-      "x-access-token": token
-    }
-  })
-}
+const solutionAPI = {
+  getAll: () => axi.get(`/v1/solution?queryType=activate`),
+  create: (createSolution) =>
+    axi.post(`/v1/solution`, createSolution, {
+      headers: {
+        'Content-Type': `application/json`,
+      },
+    }),
+  update: (updateSolution) =>
+    axi.put(`/v1/solution/${updateSolution.id}`, updateSolution, {
+      headers: {
+        'Content-Type': `application/json`,
+      },
+    }),
+  delete: (id) => axi.delete(`/v1/solution/${id}`),
+};
 
-export {roleAPI, permissionAPI, protectedAPI ,statisticAPI, categoryAPI, productAPI, brandAPI, userAPI, productDetailAPI, importOrderAPI, orderAPI, notificationAPI,consignmentAPI };
+export {
+  userAPI,
+  brandAPI,
+  productAPI,
+  categoryAPI,
+  imageAPI,
+  productPackageAPI,
+  productBenefitAPI,
+  benefitValueAPI,
+  newsAPI,
+  aboutCompanyAPI,
+  solutionAPI
+};

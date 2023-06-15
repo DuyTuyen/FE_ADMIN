@@ -12,21 +12,18 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { showLoading, closeLoading } from 'src/redux/slices/LoadingSlice';
 import { setErrorValue } from 'src/redux/slices/ErrorSlice';
-import { useNavigate } from 'react-router-dom';
 import Loading from 'src/components/loading/Loading';
-import CreateBrandModal from 'src/sections/@dashboard/brand/CreateCategoryModal';
-import UpdateBrandModal from 'src/sections/@dashboard/brand/UpdateCategoryModal';
-import DeleteBrandModal from 'src/sections/@dashboard/brand/DeleteCategoryModal';
-import brand from '../_mock/brand';
+import CreateBrandModal from 'src/sections/@dashboard/brand/CreateBrandModal';
+import UpdateBrandModal from 'src/sections/@dashboard/brand/UpdateBrandModal';
+import DeleteBrandModal from 'src/sections/@dashboard/brand/DeleteBrandModal';
+import Page from '../enums/page';
 // ----------------------------------------------------------------------
 export default function BrandPage() {
   const loading = useSelector((state) => state.loading.value);
 
   const dispatch = useDispatch();
 
-  const navigate = useNavigate();
-
-  const [brands, setBrands] = useState(brand);
+  const [brands, setBrands] = useState([]);
 
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -62,22 +59,24 @@ export default function BrandPage() {
     setShowDeleteForm(false);
   }
 
-  // useEffect(() => {
-  //   async function getBrands() {
-  //     dispatch(showLoading());
-  //     try {
-  //       const res = await brandAPI.getAll();
-  //       setBrands(res.data);
-  //     } catch (error) {
-  //       if (axios.isAxiosError(error))
-  //         dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
-  //       else dispatch(setErrorValue(error.toString()));
-  //     } finally {
-  //       dispatch(closeLoading());
-  //     }
-  //   }
-  //   getBrands();
-  // }, []);
+  useEffect(() => {
+    async function getBrands() {
+      dispatch(showLoading());
+      try {
+        const res = await brandAPI.getAll();
+        console.log(res.data)
+        setBrands(res.data.data);
+      } catch (error) {
+        if (axios.isAxiosError(error))
+        alert((error.response ? error.response.data.message : error.message))
+      else
+        alert((error.toString()))
+      } finally {
+        dispatch(closeLoading());
+      }
+    }
+    getBrands();
+  }, []);
 
   async function handleOnSubmitCreate(formData) {
     setShowCreateForm(false);
@@ -85,12 +84,13 @@ export default function BrandPage() {
     try {
       const res = await brandAPI.create(formData);
       const newBrands = [...brands];
-      newBrands.unshift(res.data[0]);
+      newBrands.unshift(res.data);
       setBrands(newBrands);
     } catch (error) {
       if (axios.isAxiosError(error))
-        dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
-      else dispatch(setErrorValue(error.toString()));
+        dispatch(setErrorValue({errorMessage: error.response ? error.response.data.message : error.message, page: Page.CREATE_BRAND}));
+      else 
+        dispatch(setErrorValue({errorMessage: error.toString(), page: Page.CREATE_BRAND}));
       setShowCreateForm(true);
     } finally {
       dispatch(closeLoading());
@@ -101,14 +101,15 @@ export default function BrandPage() {
     setShowUpdateForm(false);
     dispatch(showLoading());
     try {
-      const resData = await brandAPI.update(clickedElement._id, formData);
-      const filterBrands = brands.filter((r) => r._id !== clickedElement._id);
+      const resData = await brandAPI.update(clickedElement.id, formData);
+      const filterBrands = brands.filter((r) => r.id !== clickedElement.id);
       const newBrands = [resData.data, ...filterBrands];
       setBrands(newBrands);
     } catch (error) {
       if (axios.isAxiosError(error))
-        dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
-      else dispatch(setErrorValue(error.toString()));
+        dispatch(setErrorValue({errorMessage: error.response ? error.response.data.message : error.message, page: Page.UPDATE_BRAND}))
+      else
+        dispatch(setErrorValue({errorMessage: error.toString(), page: Page.UPDATE_BRAND}))
       setShowUpdateForm(true);
     } finally {
       dispatch(closeLoading());
@@ -119,23 +120,22 @@ export default function BrandPage() {
     setShowDeleteForm(false);
     dispatch(showLoading());
     try {
-      await brandAPI.delete(clickedElement._id);
-      const newBrands = brands.filter((r) => r._id !== clickedElement._id);
+      await brandAPI.delete(clickedElement.id);
+      const newBrands = brands.filter((r) => r.id !== clickedElement.id);
       setBrands(newBrands);
     } catch (error) {
-      if (axios.isAxiosError(error)) alert(error.response ? error.response.data.message : error.message);
-      else alert(error.toString());
+      if (axios.isAxiosError(error))
+        alert((error.response ? error.response.data.message : error.message));
+      else 
+        alert(error.toString());
     } finally {
       dispatch(closeLoading());
     }
   }
-
-  return loading ? (
-    <Loading />
-  ) : (
+  return loading ? <Loading /> : (
     <>
       <Helmet>
-        <title> Dashboard: Thương hiệu</title>
+        <title>Thương hiệu</title>
       </Helmet>
 
       <Container>

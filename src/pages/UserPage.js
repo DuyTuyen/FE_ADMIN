@@ -1,33 +1,24 @@
 import { Helmet } from 'react-helmet-async';
 import { filter } from 'lodash';
-import { sentenceCase } from 'change-case';
 import { useState } from 'react';
 // @mui
 import {
   Card,
   Table,
   Stack,
-  Paper,
-  Avatar,
-  Button,
   Popover,
-  Checkbox,
-  TableRow,
   MenuItem,
   TableBody,
   TableCell,
-  Container,
   Typography,
-  IconButton,
   TableContainer,
-  TablePagination,
+  TableRow,
 } from '@mui/material';
 // components
-import Label from '../components/label';
 import Iconify from '../components/iconify';
 import Scrollbar from '../components/scrollbar';
 // sections
-import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
+import { UserListHead } from '../sections/@dashboard/user';
 // mock
 import USERLIST from '../_mock/user';
 import { userAPI } from 'src/api/ConfigAPI';
@@ -45,8 +36,6 @@ const TABLE_HEAD = [
   { id: 'phone', label: 'SDT', alignRight: false },
   { id: 'address', label: 'Địa chỉ', alignRight: false },
   { id: 'email', label: 'Email', alignRight: false },
-  { id: 'role', label: 'Chức vụ', alignRight: false },
-  { id: 'name', label: 'ten va sdt', alignRight: false },
 ];
 
 // ----------------------------------------------------------------------
@@ -117,8 +106,9 @@ export default function UserPage() {
         setUsers(res.data);
       } catch (error) {
         if (axios.isAxiosError(error))
-          dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
-        else dispatch(setErrorValue(error.toString()));
+          alert(error.response ? error.response.data.message : error.message);
+        else 
+          alert(error.toString());
       } finally {
         dispatch(closeLoading());
       }
@@ -129,12 +119,12 @@ export default function UserPage() {
   return (
     <>
       <Helmet>
-        <title> Tài khoản | Minimal UI </title>
+        <title> Khách hàng </title>
       </Helmet>
 
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
         <Typography variant="h4" gutterBottom>
-          Tài khoản
+          Khách hàng 
         </Typography>
       </Stack>
 
@@ -151,11 +141,11 @@ export default function UserPage() {
               />
               <TableBody>
                 {users.map((row) => {
-                  const { _id, name, phone, address, email, r_role } = row;
+                  const { id, name, phone, address, email } = row;
                   // const selectedUser = selected.indexOf(name) !== -1;
 
                   return (
-                    <TableRow>
+                    <TableRow key={id}>
                       {/*  <TableRow hover key={id} tabIndex={-1} role="checkbox" selected={selectedUser}> */}
                       {/* <TableCell padding="checkbox">
                           <Checkbox checked={selectedUser} onChange={(event) => handleClick(event, name)} />
@@ -174,8 +164,6 @@ export default function UserPage() {
                       <TableCell align="left">{address}</TableCell>
 
                       <TableCell align="left">{email}</TableCell>
-                      <TableCell align="left">{r_role?.title}</TableCell>
-                      <TableCell align='left'>{name}{phone}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -205,12 +193,12 @@ export default function UserPage() {
       >
         <MenuItem>
           <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-          Edit
+          Chỉnh sửa
         </MenuItem>
 
         <MenuItem sx={{ color: 'error.main' }}>
           <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
-          Delete
+          Xoá
         </MenuItem>
       </Popover>
     </>

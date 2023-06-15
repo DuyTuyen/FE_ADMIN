@@ -2,32 +2,32 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Form, Button } from 'react-bootstrap';
 
-DeleteBrandModal.propTypes = {
+DeleteSolutionModal.propTypes = {
   isShow: PropTypes.bool,
   onClose: PropTypes.func,
   onSubmit: PropTypes.func,
-  activeBrand: PropTypes.object,
+  activeSolution: PropTypes.object,
 };
 
-function DeleteBrandModal(props) {
-  const { isShow, onClose, onSubmit, activeBrand } = props;
+function DeleteSolutionModal(props) {
+  const { isShow, onClose, onSubmit, activeSolution } = props;
 
   function handleClose() {
     if (onClose) onClose();
   }
 
-  function handleDeleteBrand(e) {
+  function handleDeleteSolution(e) {
     e.preventDefault();
-    if (onSubmit) onSubmit(activeBrand._id);
+    if (onSubmit) onSubmit(activeSolution.id);
   }
 
   return (
     <Modal style={{ zIndex: 9999 }} show={isShow} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Bnạ có chắc muốn xoá {activeBrand?.name}</Modal.Title>
+        <Modal.Title>Bạn có chắc muốn xoá {activeSolution?.name}</Modal.Title>
       </Modal.Header>
 
-      <Form onSubmit={handleDeleteBrand}>
+      <Form onSubmit={handleDeleteSolution}>
         <Modal.Footer>
           <Button variant="primary" type="submit">
             Xoá
@@ -41,4 +41,4 @@ function DeleteBrandModal(props) {
   );
 }
 
-export default DeleteBrandModal;
+export default DeleteSolutionModal;

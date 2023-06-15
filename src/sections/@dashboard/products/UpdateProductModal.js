@@ -1,21 +1,68 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Form, Button } from 'react-bootstrap';
-import { useSelector } from 'react-redux';
+import { Modal, Form, Button, Image } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
 import { Alert } from '@mui/material';
+import Page from 'src/enums/page';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import { brandAPI, categoryAPI, imageAPI } from 'src/api/ConfigAPI';
+import { setErrorValue } from 'src/redux/slices/ErrorSlice';
+import axios from 'axios';
+import Loading from 'src/components/loading/Loading';
 
 UpdateProductModal.propTypes = {
     isShow: PropTypes.bool,
     onClose: PropTypes.func,
-    onSubmit: PropTypes.func,
+    onUpdateProduct: PropTypes.func,
     categories: PropTypes.array,
     brands: PropTypes.array,
-    activeProduct: PropTypes.object,
 };
 
 function UpdateProductModal(props) {
-    const errorMessage = useSelector(state => state.error.value)
-    const { isShow, onClose, onSubmit, categories, brands, activeProduct } = props
+    const dispatch = useDispatch();
+    const {errorMessage, page} = useSelector(state => state.error.value)
+
+    const [isWait, setIsWait] = useState(false);
+    const [name, setName] = useState('')
+    const [brandId, setBrandId] = useState('')
+    const [categoryId, setCategoryId] = useState('')
+    const [imageId, setImageId] = useState('')
+    const [imagePath, setImagePath] = useState(null)
+    const [description, setDescription] = useState('')
+    const [categories, setCategories] = useState([])
+    const [brands, setBrands] = useState([])
+    const { isShow, onClose, onSubmit, updateProduct} = props
+
+    useEffect(
+        () => {
+            if(!updateProduct){
+                return;
+            }
+            setName(updateProduct.name);
+            setDescription( updateProduct.description);
+            setBrandId( updateProduct.brand?.id);
+            setCategoryId( updateProduct.category?.id);
+            setImageId( updateProduct.image?.id);
+            setImagePath( updateProduct.image?.path);
+
+            async function getPropertyOptions() {
+                try {
+
+                    const resBrands = await brandAPI.getAll();
+                    const resCategories = await categoryAPI.getAll();
+                    setBrands(resBrands.data.data);
+                    setCategories(resCategories.data.data);
+                } catch (error) {
+                 alert(error);   
+                }
+            }
+            getPropertyOptions();
+
+        
+        }
+        ,[isShow, onClose, onSubmit, updateProduct]
+    )
 
     function handleClose() {
         if (onClose)
@@ -24,59 +71,118 @@ function UpdateProductModal(props) {
 
     function handleUpdateProduct(e) {
         e.preventDefault()
-        const formData = new FormData(e.target)
+
+        if(isWait){
+            window.alert('Vui lòng chờ hình được upload');
+            return;
+        }
+
         const data = {
-            name: formData.get("name"),
-            price: parseInt(formData.get("price")),
-            des: formData.get("des"),
-            r_category: formData.get("r_category"),
-            r_brand: formData.get("r_brand"),
+            name,
+            categoryId,
+            brandId,
+            imageId,
+            description
         }
         if (onSubmit)
             onSubmit(data)
     }
 
+    async function handleUploadImage(file){
+        try {
+          setIsWait(true)    
+          const formData = new FormData();
+          formData.append('files', file.target.files[0])
+          const res = await imageAPI.create(formData);
+          const data = res.data;
+          setImageId(data[0].id);
+          setImagePath(data[0].path);
+        } catch (error) {
+            if (axios.isAxiosError(error))
+            dispatch(setErrorValue({errorMessage: error.response ? error.response.data.message : error.message, page: Page.UPDATE_PRODUCT}));
+          else 
+            dispatch(setErrorValue({errorMessage: error.toString(), page: Page.UPDATE_PRODUCT}));
+        } finally{
+          setIsWait(false);
+        }
+      }
+    
+      async function handleDeleteImage(e){
+        try {
+          if(!imageId){
+            return
+          }
+          await imageAPI.delete(imageId);
+          e.target.value = null;
+          setImageId(null);
+          setImagePath(null);
+        } catch (error) {
+          if (axios.isAxiosError(error))
+            dispatch(setErrorValue({errorMessage: error.response ? error.response.data.message : error.message, page: Page.UPDATE_PRODUCT}));
+          else 
+            dispatch(setErrorValue({errorMessage: error.toString(), page: Page.UPDATE_PRODUCT}));
+        }
+      }
+
     return (
-        <Modal style={{ zIndex: 9999 }} show={isShow} onHide={handleClose}>
+        <Modal style={{ zIndex: 10000}} show={isShow} onHide={handleClose}>
             <Modal.Header closeButton>
-                <Modal.Title>Update Product</Modal.Title>
+                <Modal.Title>Cập nhật sản phẩm</Modal.Title>
             </Modal.Header>
-            {errorMessage !== "" ?
-                errorMessage.split("---").map((err, index) => <Alert key={index} severity="error">{err}</Alert>) :
+            {errorMessage !== "" && errorMessage && page === Page.UPDATE_PRODUCT?
+                <Alert severity="error">{errorMessage}</Alert> :
                 <></>
             }
             <Form onSubmit={handleUpdateProduct} >
 
                 <Modal.Body>
                     <Form.Group className="mb-3">
-                        <Form.Label>Name</Form.Label>
-                        <Form.Control defaultValue={activeProduct?.name} name="name" type="text" placeholder="Type product name" />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Price</Form.Label>
-                        <Form.Control defaultValue={activeProduct?.price} name="price" type="number" min="1" placeholder="Type product price (VND)" />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Description</Form.Label>
-                        <Form.Control defaultValue={activeProduct?.des} name="des" type="text" placeholder="Type product description" />
+                        <Form.Label>Tên</Form.Label>
+                        <Form.Control value={name} onChange={(e) => {setName(e.target.value)}} type="text" placeholder="Type product name" />
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Category</Form.Label>
-                        <Form.Select selected={activeProduct?.r_category._id} name="r_category" aria-label="Select Category">
+                        <Form.Label>Mô tả</Form.Label>
+                        <CKEditor
+                            editor={ ClassicEditor }
+                            data={description}
+                            onChange={ ( event, editor ) => {
+                                const data = editor.getData();
+                                console.log( { event, editor, data } );
+                                setDescription(data);
+                            } }
+                        />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3">
+                        <Form.Label>
+                        Hình ảnh
+                        {
+                            isWait ? 
+                            <Loading></Loading>: 
+                            imageId ? <Image  height="100" width="100" style={{marginTop: '10px'}}src={imagePath} alt="product-image" />: <></>
+                        }
+                        </Form.Label>
+                        <Form.Control accept="image/*" type="file" min="1" placeholder="Chọn hình ảnh"  onChange={(e) => handleUploadImage(e)} onClick={(e) => handleDeleteImage(e)}/>
+                        <Form.Control type="hidden" value={imageId}/>
+                    </Form.Group>
+
+                    <Form.Group className="mb-3">
+                        <Form.Label>Loại</Form.Label>
+                        <Form.Select name="r_category" aria-label="Select Category" onChange={(e) => {setCategoryId(e.target.value)}}>
                             {
-                                categories.map(cate => (
-                                    <option  key={cate._id} value={cate._id}>{cate.name}</option>
+                                categories?.map(cate => (
+                                    <option selected={cate.id === categoryId} key={cate.id} value={cate.id}>{cate.name}</option>
                                 ))
                             }
                         </Form.Select>
                     </Form.Group>
                     <Form.Group className="mb-3">
-                        <Form.Label>Brand</Form.Label>
-                        <Form.Select selected={activeProduct?.r_brand._id} name="r_brand" aria-label="Select Brand">
+                        <Form.Label>Thương hiệu</Form.Label>
+                        <Form.Select name="r_brand" aria-label="Select Brand" onChange={(e) => {setBrandId(e.target.value)}}>
                             {
-                                brands.map(brand => (
-                                    <option key={brand._id} value={brand._id}>{brand.name}</option>
+                                brands?.map(brand => (
+                                    <option selected={brand.id === brandId} key={brand.id} value={brand.id}>{brand.name}</option>
                                 ))
                             }
                         </Form.Select>
@@ -84,7 +190,7 @@ function UpdateProductModal(props) {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="primary" type="submit">
-                        Update
+                        Cập nhật
                     </Button>
                 </Modal.Footer>
             </Form>

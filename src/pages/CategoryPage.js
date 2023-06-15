@@ -12,7 +12,6 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { showLoading, closeLoading } from 'src/redux/slices/LoadingSlice';
 import { setErrorValue } from 'src/redux/slices/ErrorSlice';
-import { useNavigate } from 'react-router-dom';
 import Loading from 'src/components/loading/Loading';
 import CreateCategoryModal from 'src/sections/@dashboard/categories/CreateCategoryModal';
 import DeleteCategoryModal from 'src/sections/@dashboard/categories/DeleteCategoryModal';
@@ -24,8 +23,6 @@ export default function CategoriesPage() {
 
   const dispatch = useDispatch();
 
-  const navigate = useNavigate();
-
   const [categories, setCategories] = useState([]);
 
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -36,7 +33,7 @@ export default function CategoriesPage() {
 
   const [clickedElement, setClickedElement] = useState(null);
 
-  function hanldeCreateFormShow() {
+  function handleCreateFormShow() {
     setShowCreateForm(true);
   }
 
@@ -67,7 +64,7 @@ export default function CategoriesPage() {
       dispatch(showLoading());
       try {
         const res = await categoryAPI.getAll();
-        setCategories(res.data);
+        setCategories(res.data.data);
       } catch (error) {
         if (axios.isAxiosError(error))
           dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
@@ -101,8 +98,8 @@ export default function CategoriesPage() {
     setShowUpdateForm(false);
     dispatch(showLoading());
     try {
-      const resData = await categoryAPI.update(clickedElement._id,formData);
-      const filterCategories = categories.filter((r) => r._id !== clickedElement._id);
+      const resData = await categoryAPI.update(clickedElement.id,formData);
+      const filterCategories = categories.filter((r) => r.id !== clickedElement.id);
       const newCategories = [resData.data, ...filterCategories];
       setCategories(newCategories);
     } catch (error) {
@@ -119,8 +116,8 @@ export default function CategoriesPage() {
     setShowDeleteForm(false);
     dispatch(showLoading());
     try {
-      await categoryAPI.delete(clickedElement._id);
-      const newCategories = categories.filter((r) => r._id !== clickedElement._id);
+      await categoryAPI.delete(clickedElement.id);
+      const newCategories = categories.filter((r) => r.id !== clickedElement.id);
       setCategories(newCategories);
     } catch (error) {
       if (axios.isAxiosError(error)) alert(error.response ? error.response.data.message : error.message);
@@ -135,15 +132,15 @@ export default function CategoriesPage() {
   ) : (
     <>
       <Helmet>
-        <title> Dashboard: Loại</title>
+        <title> Dashboard: Loại sản phẩm</title>
       </Helmet>
 
       <Container>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
-            Loại
+            Loại sản phẩm
           </Typography>
-          <Button onClick={hanldeCreateFormShow} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
+          <Button onClick={handleCreateFormShow} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
             Tạo mới
           </Button>
         </Stack>

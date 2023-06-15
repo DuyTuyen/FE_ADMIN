@@ -17,12 +17,10 @@ import Iconify from '../../../components/iconify';
 import Scrollbar from '../../../components/scrollbar';
 import { ColorMultiPicker } from '../../../components/color-utils';
 import { useEffect, useState } from 'react';
-import { closeLoading, showLoading } from 'src/redux/slices/LoadingSlice';
 import { categoryAPI, productAPI } from 'src/api/ConfigAPI';
 import axios from 'axios';
 import { setErrorValue } from 'src/redux/slices/ErrorSlice';
-import { useDispatch, useSelector } from 'react-redux';
-import Loading from 'src/components/loading/Loading';
+import { useDispatch } from 'react-redux';
 
 // ----------------------------------------------------------------------
 
@@ -47,36 +45,16 @@ ShopFilterSidebar.propTypes = {
 };
 
 export default function ShopFilterSidebar({ openFilter, onOpenFilter, onCloseFilter, onFilter }) {
-  const dispatch = useDispatch()
-  const [categories, setCategories] = useState([])
-  const [selectedCate, setSelectedCate] = useState(null)
-  const [selectedColors, setSelectedColors] = useState([])
-
-  useEffect(() => {
-    async function getCategoties() {
-      try {
-        const res = await categoryAPI.getAll();
-        setCategories(res.data);
-      } catch (error) {
-        if (axios.isAxiosError(error))
-          dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
-        else dispatch(setErrorValue(error.toString()));
-      } finally {
-      }
-    }
-    if (openFilter)
-      getCategoties();
-  }, [dispatch, openFilter]);
 
 
   function handleChangeColor(isChecked, color) {
-    if (isChecked) {
-      const tempColors = [...selectedColors, color]
-      setSelectedColors(tempColors)
-    } else {
-      const tempColors = selectedColors.filter(c => c !== color)
-      setSelectedColors(tempColors)
-    }
+    // if (isChecked) {
+    //   const tempColors = [...selectedColors, color]
+    //   setSelectedColors(tempColors)
+    // } else {
+    //   const tempColors = selectedColors.filter(c => c !== color)
+    //   setSelectedColors(tempColors)
+    // }
   }
   return (
     <>
@@ -110,11 +88,11 @@ export default function ShopFilterSidebar({ openFilter, onOpenFilter, onCloseFil
                 Danh mục sản phẩm
               </Typography>
               <RadioGroup>
-                {categories.map((item) => (
+                {/* {categories.map((item) => (
                   <FormControlLabel onChange={(e) => {
                     setSelectedCate(e.target.value)
                   }} key={item._id} value={item._id} control={<Radio />} label={item.name} />
-                ))}
+                ))} */}
               </RadioGroup>
             </div>
 
@@ -124,7 +102,7 @@ export default function ShopFilterSidebar({ openFilter, onOpenFilter, onCloseFil
               </Typography>
               <ColorMultiPicker
                 name="colors"
-                selected={selectedColors}
+                //selected={selectedColors}
                 colors={COLORS}
                 onChangeColor={handleChangeColor}
                 sx={{ maxWidth: 38 * 4 }}
@@ -140,10 +118,10 @@ export default function ShopFilterSidebar({ openFilter, onOpenFilter, onCloseFil
             type="submit"
             color="inherit"
             variant="outlined"
-            onClick={() => {
-              if (openFilter)
-                onFilter({ selectedCate, selectedColors })
-            }}
+            // onClick={() => {
+            //   if (openFilter)
+            //     onFilter({ selectedCate, selectedColors })
+            // }}
           >
             Thực hiện lọc
           </Button>

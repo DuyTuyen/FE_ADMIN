@@ -46,7 +46,7 @@ export default function BrandCard({ brand, onUpdateClick, onDeleteClick }) {
         )}
         <StyledBrandImg
           alt={brand.name}
-          src={`${brand.image}`}
+          src={`${brand.image?.path}`}
         />
       </Box>
 

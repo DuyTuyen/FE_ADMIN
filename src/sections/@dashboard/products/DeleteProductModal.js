@@ -21,7 +21,7 @@ function DeleteProductModal(props) {
     function handleDeleteProduct(e) {
         e.preventDefault()
         if (onSubmit)
-            onSubmit(activeProduct._id)
+            onSubmit(activeProduct.id)
     }
 
     return (

@@ -13,7 +13,7 @@ const navConfig = [
   },
   {
     title: 'Sản phẩm',
-    path: '/dashboard/products',
+    path: '/dashboard/product',
     icon: icon('ic_blog'),
   },
   {
@@ -21,7 +21,21 @@ const navConfig = [
     path: '/dashboard/brand',
     icon: icon('ic_blog'),
   },
-
+  {
+    title: 'Loại sản phẩm',
+    path: '/dashboard/category',
+    icon: icon('ic_blog'),
+  },
+  {
+    title: 'Tin tức',
+    path: '/dashboard/news',
+    icon: icon('ic_blog'),
+  },
+  {
+    title: 'Bài viết giới thiệu',
+    path: '/dashboard/about-company',
+    icon: icon('ic_blog'),
+  },
 ];
 
 export default navConfig;

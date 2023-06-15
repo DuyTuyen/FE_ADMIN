@@ -9,47 +9,47 @@ import { setErrorValue } from 'src/redux/slices/ErrorSlice';
 import axios from 'axios';
 import Loading from 'src/components/loading/Loading';
 
-UpdateCategoryModal.propTypes = {
+UpdateBrandModal.propTypes = {
   isShow: PropTypes.bool,
   onClose: PropTypes.func,
   onSubmit: PropTypes.func,
-  activeCategory: PropTypes.object,
+  activeBrand: PropTypes.object,
 };
 
-function UpdateCategoryModal(props) {
+function UpdateBrandModal(props) {
   const dispatch = useDispatch();
 
   const [isWait, setIsWait] = useState(false);
 
   const {errorMessage, page} = useSelector((state) => state.error.value);
-  const { isShow, onClose, onSubmit, activeCategory } = props;
+  const { isShow, onClose, onSubmit, activeBrand } = props;
 
-  const [categoryName, setCategoryName] = useState(activeCategory?.name);
-  const [imageId, setImageId] = useState(activeCategory?.image?.id);
-  const [imagePath, setImagePath] = useState(activeCategory?.image?.path);
+  const [brandName, setBrandName] = useState(activeBrand?.name);
+  const [imageId, setImageId] = useState(activeBrand?.image?.id);
+  const [imagePath, setImagePath] = useState(activeBrand?.image?.path);
 
   function handleClose() {
     if (onClose) onClose();
   }
 
   useEffect(() => {
-    setCategoryName(activeCategory?.name);
-    setImageId(activeCategory?.image?.id);
-    setImagePath(activeCategory?.image?.path);
-  },[activeCategory])
+    setBrandName(activeBrand?.name);
+    setImageId(activeBrand?.image?.id);
+    setImagePath(activeBrand?.image?.path);
+  },[activeBrand])
 
-  function handleUpdateCategory(e) {
+  function handleUpdateBrand(e) {
     e.preventDefault();
     if(isWait){
       window.alert('Vui lòng chờ hình ảnh được tải lên');
       return;
     }
     if (onSubmit){
-      const updateCategory = {
+      const updateBrand = {
         imageId,
-        name: categoryName
+        name: brandName
       }
-      onSubmit(updateCategory);
+      onSubmit(updateBrand);
     }
   }
 
@@ -64,9 +64,9 @@ function UpdateCategoryModal(props) {
       setImagePath(data[0].path);
     } catch (error) {
       if (axios.isAxiosError(error))
-        dispatch(setErrorValue({errorMessage: error.response ? error.response.data.message : error.message, page: Page.UPDATE_CATEGORY}));
+        dispatch(setErrorValue({errorMessage: error.response ? error.response.data.message : error.message, page: Page.UPDATE_BRAND}));
       else 
-      dispatch(setErrorValue({errorMessage: error.toString(), page: Page.UPDATE_CATEGORY}));
+        dispatch(setErrorValue({errorMessage: error.toString(), page: Page.UPDATE_BRAND}));
     } finally{
       setIsWait(false);
     }
@@ -81,24 +81,23 @@ function UpdateCategoryModal(props) {
       <Modal.Header closeButton>
         <Modal.Title>Cập nhật</Modal.Title>
       </Modal.Header>
-      {errorMessage !== '' && errorMessage && page === Page.UPDATE_CATEGORY ? (
+      {errorMessage !== '' && errorMessage && page === Page.UPDATE_BRAND ? (
           <Alert severity="error">
             {errorMessage}
           </Alert>
-      
       ) : (
         <></>
       )}
-      <Form onSubmit={handleUpdateCategory}>
+      <Form onSubmit={handleUpdateBrand}>
         <Modal.Body>
           <Form.Group className="mb-3">
             <Form.Label>Tên thương hiệu</Form.Label>
             <Form.Control
-              value={categoryName}
+              value={brandName}
               defaultValue={''}
-              onChange={(e) => setCategoryName(e.target.value)}
+              onChange={(e) => setBrandName(e.target.value)}
               type="text"
-              placeholder="Type Category name"
+              placeholder="Type Brand name"
             />
           </Form.Group>
           <Form.Group className="mb-3">
@@ -107,7 +106,7 @@ function UpdateCategoryModal(props) {
               {
                  isWait ? 
                  <Loading></Loading>: 
-                 imageId ? <Image  height="100" width="100" style={{marginTop: '10px'}}src={imagePath} alt="category-image" />: <></>
+                 imageId ? <Image  height="100" width="100" style={{marginTop: '10px'}}src={imagePath} alt="brand-image" />: <></>
               }
             </Form.Label>
             <Form.Control accept="image/*" type="file" min="1" placeholder="Chọn hình ảnh"  onChange={(e) => handleUploadImage(e)} onClick={(e) => handleDeleteImage(e)}/>
@@ -124,4 +123,4 @@ function UpdateCategoryModal(props) {
   );
 }
 
-export default UpdateCategoryModal;
+export default UpdateBrandModal;

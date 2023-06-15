@@ -3,10 +3,8 @@ import PropTypes from 'prop-types';
 import { Box, Card, Link, Typography, Stack } from '@mui/material';
 import { styled } from '@mui/material/styles';
 // utils
-import { fCurrency } from '../../../utils/formatNumber';
 // components
 import Label from '../../../components/label';
-import { ColorPreview } from '../../../components/color-utils';
 import ActionDropdown from 'src/components/Dropdown/ActionDropdown';
 
 // ----------------------------------------------------------------------
@@ -46,7 +44,7 @@ export default function CategoryCard({ category, onUpdateClick, onDeleteClick })
         )}
         <StyledCategoryImg
           alt={category.name}
-          src={`${process.env.REACT_APP_CLOUDINARYURL}${category.img}`}
+          src={category.image?.path}
         />
       </Box>
 

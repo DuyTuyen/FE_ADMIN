@@ -5,7 +5,6 @@ import { styled } from '@mui/material/styles';
 //
 import Header from './header';
 import Nav from './nav';
-import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 // ----------------------------------------------------------------------

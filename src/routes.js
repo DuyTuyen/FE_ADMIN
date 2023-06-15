@@ -9,15 +9,10 @@ import ProductsPage from './pages/ProductsPage';
 import DashboardAppPage from './pages/DashboardAppPage';
 import CategoryPage from './pages/CategoryPage';
 import BrandPage from './pages/BrandPage';
-import ImportOrderPage from './pages/ImportOrderPage';
-import OrderPage from './pages/OrderPage';
-import ConsignmentPage from './pages/ConsignmentPage';
-import { protectedAPI } from './api/ConfigAPI';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import RolePage from './pages/RolePage';
-import PermissionPage from './pages/PermissionPage';
+import NewsPage from './pages/NewsPage';
+import AboutCompanyPage from './pages/AboutCompanyPage';
+import SolutionPage from './pages/solutionPage';
+
 // ----------------------------------------------------------------------
 
 export default function Router() {
@@ -42,7 +37,7 @@ export default function Router() {
           
         },
         {
-          path: 'products', element: 
+          path: 'product', element: 
             <ProductsPage />
           
         },
@@ -57,28 +52,18 @@ export default function Router() {
           
         },
         {
-          path: 'importorder', element: 
-            <ImportOrderPage />
+          path: 'news', element: 
+            <NewsPage />
           
         },
         {
-          path: 'order', element: 
-            <OrderPage />
+          path: 'about-company', element: 
+            <AboutCompanyPage />
           
         },
         {
-          path: 'consignment', element: 
-            <ConsignmentPage />
-          
-        },
-        {
-          path: 'role', element: 
-            <RolePage />
-          
-        },
-        {
-          path: 'permission', element: 
-            <PermissionPage />
+          path: 'solution', element: 
+            <SolutionPage />
           
         },
       ],

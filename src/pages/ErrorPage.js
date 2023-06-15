@@ -3,7 +3,6 @@ import { Link as RouterLink } from 'react-router-dom';
 // @mui
 import { styled } from '@mui/material/styles';
 import { Button, Typography, Container } from '@mui/material';
-import { useSelector } from 'react-redux';
 
 // ----------------------------------------------------------------------
 
@@ -20,7 +19,6 @@ const StyledContent = styled('div')(({ theme }) => ({
 // ----------------------------------------------------------------------
 
 export default function ErrorPage() {
-  const error = useSelector(state => state.error.value)
   
   return (
     <>
@@ -31,7 +29,7 @@ export default function ErrorPage() {
       <Container>
         <StyledContent sx={{ textAlign: 'center', alignItems: 'center' }}>
           <Typography variant="h3" paragraph>
-            Sorry, {error}!
+            Xin lỗi, không tìm thấy trang mà bạn cần!
           </Typography>
 
 

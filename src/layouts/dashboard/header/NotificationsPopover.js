@@ -25,7 +25,7 @@ import { closeLoading, showLoading } from 'src/redux/slices/LoadingSlice';
 import axios from 'axios';
 import { setErrorValue } from 'src/redux/slices/ErrorSlice';
 import Loading from 'src/components/loading/Loading';
-import { notificationAPI } from 'src/api/ConfigAPI';
+// import { notificationAPI } from 'src/api/ConfigAPI';
 import { useNavigate } from 'react-router-dom';
 
 // ----------------------------------------------------------------------
@@ -52,21 +52,21 @@ export default function NotificationsPopover() {
   };
 
   const handleMarkRead = async (notification) => {
-    dispatch(showLoading());
-    try {
-      const res = await notificationAPI.updateIsRead(notification._id);
-      const tempReadNotifications = [...readNotifications, {...notification, isRead: true}]
-      const tempUnReadNotifications = unReadNotifications.filter(n => n._id !== notification._id)
-      setReadNotifications(tempReadNotifications);
-      setUnReadNotifications(tempUnReadNotifications)
-    } catch (error) {
-      if (axios.isAxiosError(error))
-        dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
-      else dispatch(setErrorValue(error.toString()));
-      navigate("/error")
-    } finally {
-      dispatch(closeLoading());
-    }
+    // dispatch(showLoading());
+    // try {
+    //   const res = await notificationAPI.updateIsRead(notification._id);
+    //   const tempReadNotifications = [...readNotifications, {...notification, isRead: true}]
+    //   const tempUnReadNotifications = unReadNotifications.filter(n => n._id !== notification._id)
+    //   setReadNotifications(tempReadNotifications);
+    //   setUnReadNotifications(tempUnReadNotifications)
+    // } catch (error) {
+    //   if (axios.isAxiosError(error))
+    //     dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
+    //   else dispatch(setErrorValue(error.toString()));
+    //   navigate("/error")
+    // } finally {
+    //   dispatch(closeLoading());
+    // }
   }
 
   const handleMarkAllAsRead = async () => {
@@ -74,21 +74,21 @@ export default function NotificationsPopover() {
   };
 
   useEffect(() => {
-    async function getNotifications() {
-      dispatch(showLoading());
-      try {
-        const res = await notificationAPI.getAll();
-        setReadNotifications(res.data.filter(i => i.isRead));
-        setUnReadNotifications(res.data.filter(i => !i.isRead));
-      } catch (error) {
-        if (axios.isAxiosError(error))
-          dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
-        else dispatch(setErrorValue(error.toString()));
-      } finally {
-        dispatch(closeLoading());
-      }
-    }
-    getNotifications();
+    // async function getNotifications() {
+    //   dispatch(showLoading());
+    //   try {
+    //     const res = await notificationAPI.getAll();
+    //     setReadNotifications(res.data.filter(i => i.isRead));
+    //     setUnReadNotifications(res.data.filter(i => !i.isRead));
+    //   } catch (error) {
+    //     if (axios.isAxiosError(error))
+    //       dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
+    //     else dispatch(setErrorValue(error.toString()));
+    //   } finally {
+    //     dispatch(closeLoading());
+    //   }
+    // }
+    // getNotifications();
   }, [])
   
    return (
@@ -223,6 +223,7 @@ function renderContent(notification) {
   );
 
   return {
+    // eslint-disable-next-line jsx-a11y/alt-text
     avatar: <img src="/assets/icons/ic_notification_chat.svg" />,
     title,
   };

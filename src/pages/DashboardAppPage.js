@@ -3,13 +3,9 @@ import { Helmet } from 'react-helmet-async';
 import { Grid, Container } from '@mui/material';
 import AppWebsiteVisits from 'src/sections/@dashboard/app/AppWebsiteVisits';
 import AppConversionRates from 'src/sections/@dashboard/app/AppConversionRates';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { closeLoading, showLoading } from 'src/redux/slices/LoadingSlice';
-import axios from 'axios';
-import { setErrorValue } from 'src/redux/slices/ErrorSlice';
 import { useNavigate } from 'react-router-dom';
-import { statisticAPI } from 'src/api/ConfigAPI';
 import Loading from 'src/components/loading/Loading';
 import MONTHS from '../enums/months'
 import revenue from '../_mock/revenue'
