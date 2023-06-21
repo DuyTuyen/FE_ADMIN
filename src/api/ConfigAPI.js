@@ -154,6 +154,35 @@ const solutionAPI = {
   delete: (id) => axi.delete(`/v1/solution/${id}`),
 };
 
+const orderAPI = {
+  getAll: (token) => axi.get('/v1/order?queryType=activate',{
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  }),
+  update: (data, token) => axi.put(`/v1/order/${data.id}`, data, {
+    headers: {
+      'Content-Type': `application/json`,
+      "Authorization": `Bearer ${token}`
+
+    }
+  }),
+  delete: (id, token) => axi.delete(`/v1/order/${id}`, {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  }),
+  create: (order, token) => {
+    return axi.post(`/v1/order`,order,{
+      headers: {
+        'Content-Type': `application/json`,
+        "Authorization": `Bearer ${token}`
+
+      }
+    })
+  },
+}
+
 export {
   userAPI,
   brandAPI,
@@ -165,5 +194,6 @@ export {
   benefitValueAPI,
   newsAPI,
   aboutCompanyAPI,
-  solutionAPI
+  solutionAPI,
+  orderAPI
 };

@@ -12,6 +12,7 @@ import BrandPage from './pages/BrandPage';
 import NewsPage from './pages/NewsPage';
 import AboutCompanyPage from './pages/AboutCompanyPage';
 import SolutionPage from './pages/solutionPage';
+import OrderPage from './pages/OrderPage';
 
 // ----------------------------------------------------------------------
 
@@ -64,6 +65,11 @@ export default function Router() {
         {
           path: 'solution', element: 
             <SolutionPage />
+          
+        },
+        {
+          path: 'order', element: 
+            <OrderPage />
           
         },
       ],
