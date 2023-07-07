@@ -16,28 +16,31 @@ import {
   ListItemButton,
 } from '@mui/material';
 // utils
-import { fDate, fToNow } from '../../../utils/formatTime';
+import { fToNow } from '../../../utils/formatTime';
 // components
 import Iconify from '../../../components/iconify';
 import Scrollbar from '../../../components/scrollbar';
 import { useDispatch, useSelector } from 'react-redux';
 import { closeLoading, showLoading } from 'src/redux/slices/LoadingSlice';
 import axios from 'axios';
-import { setErrorValue } from 'src/redux/slices/ErrorSlice';
 import Loading from 'src/components/loading/Loading';
 // import { notificationAPI } from 'src/api/ConfigAPI';
 import { useNavigate } from 'react-router-dom';
+import { notificationAPI } from 'src/api/ConfigAPI';
+import { Image } from 'react-bootstrap';
 
 // ----------------------------------------------------------------------
 
 export default function NotificationsPopover() {
-  const { loading } = useSelector(state => {
+  const { loading, token } = useSelector(state => {
     return {
-      loading: state.loading.value
+      loading: state.loading.value,
+      token: state.token.value
     }
   })
   const [readNotifications, setReadNotifications] = useState([]);
   const [unReadNotifications, setUnReadNotifications] = useState([]);
+
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
@@ -52,48 +55,59 @@ export default function NotificationsPopover() {
   };
 
   const handleMarkRead = async (notification) => {
-    // dispatch(showLoading());
-    // try {
-    //   const res = await notificationAPI.updateIsRead(notification._id);
-    //   const tempReadNotifications = [...readNotifications, {...notification, isRead: true}]
-    //   const tempUnReadNotifications = unReadNotifications.filter(n => n._id !== notification._id)
-    //   setReadNotifications(tempReadNotifications);
-    //   setUnReadNotifications(tempUnReadNotifications)
-    // } catch (error) {
-    //   if (axios.isAxiosError(error))
-    //     dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
-    //   else dispatch(setErrorValue(error.toString()));
-    //   navigate("/error")
-    // } finally {
-    //   dispatch(closeLoading());
-    // }
+    try {  
+      await notificationAPI.update(notification.id, token);
+      const tempReadNotifications = [...readNotifications, {...notification, isRead: true}]
+      const tempUnReadNotifications = unReadNotifications.filter(n => n.id !== notification.id)
+      setReadNotifications(tempReadNotifications);
+      setUnReadNotifications(tempUnReadNotifications)
+    } catch (error) {
+      if (axios.isAxiosError(error))
+        dispatch(alert(error.response ? error.response.data.message : error.message));
+      else dispatch(alert(error.toString()));
+      navigate("/error")
+    }
   }
 
   const handleMarkAllAsRead = async () => {
-    await Promise.all(unReadNotifications.map(n => handleMarkRead(n)))
+      try {  
+        await Promise.all(unReadNotifications.map((notification) => notificationAPI.update(notification.id, token)));
+        const tempReadNotifications = [...readNotifications, ...unReadNotifications.map(n => {
+          return {
+            ...n,
+            isRead: true
+          }
+        })]
+        setReadNotifications(tempReadNotifications);
+        setUnReadNotifications([])
+      } catch (error) {
+        if (axios.isAxiosError(error))
+          dispatch(alert(error.response ? error.response.data.message : error.message));
+        else dispatch(alert(error.toString()));
+        navigate("/error")
+      }
   };
 
   useEffect(() => {
-    // async function getNotifications() {
-    //   dispatch(showLoading());
-    //   try {
-    //     const res = await notificationAPI.getAll();
-    //     setReadNotifications(res.data.filter(i => i.isRead));
-    //     setUnReadNotifications(res.data.filter(i => !i.isRead));
-    //   } catch (error) {
-    //     if (axios.isAxiosError(error))
-    //       dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
-    //     else dispatch(setErrorValue(error.toString()));
-    //   } finally {
-    //     dispatch(closeLoading());
-    //   }
-    // }
-    // getNotifications();
-  }, [])
+    async function getNotifications() {
+      dispatch(showLoading());
+      try {
+        const resReadNotifications = await notificationAPI.getAll("isRead=true", token);
+        const resUnReadNotifications = await notificationAPI.getAll("isRead=false", token);
+        setReadNotifications(resReadNotifications.data.data);
+        setUnReadNotifications(resUnReadNotifications.data.data);
+      } catch (error) {
+        if (axios.isAxiosError(error))
+          alert(error.response ? error.response.data.message : error.message);
+        else alert(error.toString());
+      } finally {
+        dispatch(closeLoading());
+      }
+    }
+    getNotifications();
+  }, [dispatch, token])
   
    return (
-    loading ?
-      <Loading /> :
       <>
         <IconButton color={open ? 'primary' : 'default'} onClick={handleOpen} sx={{ width: 40, height: 40 }}>
           <Badge badgeContent={unReadNotifications?.length} color="error">
@@ -144,7 +158,7 @@ export default function NotificationsPopover() {
               }
             >
               {unReadNotifications.map((notification) => (
-                <NotificationItem handleMarkRead={handleMarkRead} key={notification.id} notification={notification} />
+                <NotificationItem handleMarkRead={() => {handleMarkRead(notification)}} key={notification.id} notification={notification} />
               ))}
             </List>
 
@@ -172,7 +186,6 @@ export default function NotificationsPopover() {
 
 
 function NotificationItem({handleMarkRead, notification }) {
-  const { avatar, title } = renderContent(notification);
 
   return (
     <ListItemButton
@@ -187,11 +200,18 @@ function NotificationItem({handleMarkRead, notification }) {
       }}
     >
       <ListItemAvatar>
-        <Avatar sx={{ bgcolor: 'background.neutral' }}>{avatar}</Avatar>
+        <Avatar sx={{ bgcolor: 'background.neutral' }}>
+          <Image src="/assets/icons/ic_notification_chat.svg" alt="image"/>
+        </Avatar>
       </ListItemAvatar>
       <ListItemText
-        primary={title}
         secondary={
+          <>
+          <Typography variant="subtitle2">
+      <Typography component="div" variant="body2" sx={{ color: 'text.secondary' }}>
+         <div dangerouslySetInnerHTML={{ __html: notification.content }} />
+      </Typography>
+    </Typography>
           <Typography
             variant="caption"
             sx={{
@@ -204,27 +224,10 @@ function NotificationItem({handleMarkRead, notification }) {
             <Iconify icon="eva:clock-outline" sx={{ mr: 0.5, width: 16, height: 16 }} />
             {fToNow(notification?.createdAt)}
           </Typography>
+          </>
         }
       />
     </ListItemButton>
   );
 }
 
-// ----------------------------------------------------------------------
-
-function renderContent(notification) {
-  const title = (
-    <Typography variant="subtitle2">
-      {"Cảnh báo lô hàng"}
-      <Typography component="div" variant="body2" sx={{ color: 'text.secondary' }}>
-        {`Lô hàng ${notification?.r_consignment.r_productDetail.r_product.name} ${notification?.r_consignment.r_productDetail.color} nhập ngày ${fDate(notification?.r_consignment.importedAt)} sắp hết,(còn ${notification?.r_consignment.quantity} sản phẩm) hãy chú ý kiếm tra kho hàng của bạn`}
-      </Typography>
-    </Typography>
-  );
-
-  return {
-    // eslint-disable-next-line jsx-a11y/alt-text
-    avatar: <img src="/assets/icons/ic_notification_chat.svg" />,
-    title,
-  };
-}

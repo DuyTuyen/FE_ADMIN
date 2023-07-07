@@ -20,7 +20,7 @@ function CreateProductPackageModal(props) {
     const [name, setName] = useState('')
     const [userNumber, setUserNumber] = useState(1)
     const [timeRangeNumber, setTimeRangeNumber] = useState(1)
-    const [timeRange, setTimeRange] = useState()
+    const [timeRange, setTimeRange] = useState('day')
     const [price, setPrice] = useState(0)
     const [currency, setCurrency] = useState('vnd')
 
@@ -29,7 +29,7 @@ function CreateProductPackageModal(props) {
     }
     
 
-  function handleCreateProductBenefit(e) {
+  function handleCreateProductPackage(e) {
     e.preventDefault();
     const data = {
       name, 
@@ -42,6 +42,13 @@ function CreateProductPackageModal(props) {
     }
   
     if (onSubmit) onSubmit(data);
+    setName('')
+    setUserNumber(1)
+    setTimeRange('')
+    setTimeRangeNumber(1)
+    setPrice(0)
+    setPrice(0)
+    setCurrency('vnd')
   }
 
   return (
@@ -53,7 +60,7 @@ function CreateProductPackageModal(props) {
                 <Alert severity="error">{errorMessage}</Alert> :
                 <></>
       }
-      <Form onSubmit={handleCreateProductBenefit}>
+      <Form onSubmit={handleCreateProductPackage}>
         <Modal.Body>
           <Form.Group className="mb-3">
             <Form.Label>Tên gói</Form.Label>
@@ -75,7 +82,9 @@ function CreateProductPackageModal(props) {
               <Form.Select  onChange={(e) => {setTimeRange(e.target.value)}}>
                   {
                       Object.values(TimeRange).map((time, index) => (
-                          <option key={index} value={time}>{time}</option>
+                          <option key={index} value={time}>{
+                            time === 'day' ? 'Ngày' : time === 'month' ? 'Tháng' : time === 'year' ? 'Năm' : 'Vĩnh viễn'
+                          }</option>
                       ))
                   }
               </Form.Select>

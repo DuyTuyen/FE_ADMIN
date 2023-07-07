@@ -1,4 +1,4 @@
-import { Navigate, useNavigate, useRoutes } from 'react-router-dom';
+import { Navigate, useRoutes } from 'react-router-dom';
 // layouts
 import DashboardLayout from './layouts/dashboard';
 
@@ -11,8 +11,11 @@ import CategoryPage from './pages/CategoryPage';
 import BrandPage from './pages/BrandPage';
 import NewsPage from './pages/NewsPage';
 import AboutCompanyPage from './pages/AboutCompanyPage';
-import SolutionPage from './pages/solutionPage';
 import OrderPage from './pages/OrderPage';
+import EmployeePage from './pages/EmployeePage';
+import SolutionPage from './pages/SolutionPage';
+import TechnovaServicePage from './pages/TechnovaServicePage';
+import BannerPage from './pages/BannerPage';
 
 // ----------------------------------------------------------------------
 
@@ -70,6 +73,26 @@ export default function Router() {
         {
           path: 'order', element: 
             <OrderPage />
+          
+        },
+        {
+          path: 'user', element: 
+            <UserPage />
+          
+        },
+        {
+          path: 'employee', element: 
+            <EmployeePage />
+          
+        },
+        {
+          path: 'technova-service', element: 
+            <TechnovaServicePage />
+          
+        },
+        {
+          path: 'banner', element: 
+            <BannerPage />
           
         },
       ],

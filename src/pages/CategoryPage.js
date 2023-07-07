@@ -17,9 +17,11 @@ import CreateCategoryModal from 'src/sections/@dashboard/categories/CreateCatego
 import DeleteCategoryModal from 'src/sections/@dashboard/categories/DeleteCategoryModal';
 import UpdateCategoryModal from 'src/sections/@dashboard/categories/UpdateCategoryModal';
 import { reject } from 'lodash';
+import SearchBar from 'src/components/searchbar';
+import ReactPaginate from 'react-paginate';
 // ----------------------------------------------------------------------
 export default function CategoriesPage() {
-  const loading = useSelector((state) => state.loading.value);
+  const token = useSelector((state) => state.token.value);
 
   const dispatch = useDispatch();
 
@@ -32,6 +34,16 @@ export default function CategoriesPage() {
   const [showDeleteForm, setShowDeleteForm] = useState(false);
 
   const [clickedElement, setClickedElement] = useState(null);
+
+  const [pageCount, setPageCount] = useState(0)
+
+  const [activePage, setActivePage] = useState(1)
+
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const handlePageClick = (event) => {
+    setActivePage(event.selected + 1);
+  };
 
   function handleCreateFormShow() {
     setShowCreateForm(true);
@@ -60,11 +72,12 @@ export default function CategoriesPage() {
   }
 
   useEffect(() => {
-    async function getCategoties() {
+    async function getCategories() {
       dispatch(showLoading());
       try {
-        const res = await categoryAPI.getAll();
+        const res = await categoryAPI.getAll(`page=${activePage}&take=5&q=${searchTerm}`,token);
         setCategories(res.data.data);
+        setPageCount(res.data.meta.pageCount)
       } catch (error) {
         if (axios.isAxiosError(error))
           dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
@@ -73,14 +86,14 @@ export default function CategoriesPage() {
         dispatch(closeLoading());
       }
     }
-    getCategoties();
-  }, []);
+    if(token)
+      getCategories();
+  }, [token, activePage, searchTerm]);
 
   async function handleOnSubmitCreate(formData) {
     setShowCreateForm(false);
-    dispatch(showLoading());
     try {
-      const res = await categoryAPI.create(formData);
+      const res = await categoryAPI.create(formData, token);
       const newCategories = [...categories];
       newCategories.unshift(res.data);
       setCategories(newCategories);
@@ -89,16 +102,14 @@ export default function CategoriesPage() {
         dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
       else dispatch(setErrorValue(error.toString()));
       setShowCreateForm(true);
-    } finally {
-      dispatch(closeLoading());
     }
   }
 
   async function handleOnSubmitUpdate(formData) {
     setShowUpdateForm(false);
-    dispatch(showLoading());
     try {
-      const resData = await categoryAPI.update(clickedElement.id,formData);
+      formData['id'] =  clickedElement.id;
+      const resData = await categoryAPI.update(formData, token);
       const filterCategories = categories.filter((r) => r.id !== clickedElement.id);
       const newCategories = [resData.data, ...filterCategories];
       setCategories(newCategories);
@@ -107,29 +118,22 @@ export default function CategoriesPage() {
         dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
       else dispatch(setErrorValue(error.toString()));
       setShowUpdateForm(true);
-    } finally {
-      dispatch(closeLoading());
     }
   }
 
   async function handleOnSubmitDelete() {
     setShowDeleteForm(false);
-    dispatch(showLoading());
     try {
-      await categoryAPI.delete(clickedElement.id);
+      await categoryAPI.delete(clickedElement.id, token);
       const newCategories = categories.filter((r) => r.id !== clickedElement.id);
       setCategories(newCategories);
     } catch (error) {
       if (axios.isAxiosError(error)) alert(error.response ? error.response.data.message : error.message);
       else alert(error.toString());
-    } finally {
-      dispatch(closeLoading());
     }
   }
 
-  return loading ? (
-    <Loading />
-  ) : (
+  return (
     <>
       <Helmet>
         <title> Dashboard: Loại sản phẩm</title>
@@ -144,11 +148,31 @@ export default function CategoriesPage() {
             Tạo mới
           </Button>
         </Stack>
+        <Stack>
+          <SearchBar 
+            filterName={searchTerm}
+            onFilterName={
+              (e) => {setSearchTerm(e.target.value)}
+            }
+          />
+        </Stack>
         <CategoryList
           categories={categories}
           onUpdateClick={handleUpdateFormShow}
           onDeleteClick={handleDeleteFormShow}
         />
+        <Stack>
+          <ReactPaginate
+          className="pagination"
+            breakLabel="..."
+            nextLabel=">"
+            onPageChange={handlePageClick}
+            pageRangeDisplayed={4}
+            pageCount={pageCount? pageCount: 0}
+            previousLabel="<"
+            renderOnZeroPageCount={null}
+          />
+        </Stack>
       </Container>
       <CreateCategoryModal
         isShow={showCreateForm}

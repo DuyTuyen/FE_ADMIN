@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Form, Button } from 'react-bootstrap';
-import { useSelector } from 'react-redux';
 
 DeleteProductModal.propTypes = {
     isShow: PropTypes.bool,
@@ -27,16 +26,16 @@ function DeleteProductModal(props) {
     return (
         <Modal style={{ zIndex: 9999 }} show={isShow} onHide={handleClose}>
             <Modal.Header closeButton>
-                <Modal.Title>Are you sure to delete {activeProduct?.name}</Modal.Title>
+                <Modal.Title>Bạn có chắc muốn xoá {activeProduct?.name}</Modal.Title>
             </Modal.Header>
     
             <Form onSubmit={handleDeleteProduct} >
                 <Modal.Footer>
                     <Button variant="primary" type="submit">
-                        Delete
+                        Xoá
                     </Button>
                     <Button variant="danger" onClick={handleClose}>
-                        Cancle
+                        Huỷ
                     </Button>
                 </Modal.Footer>
             </Form>

@@ -18,6 +18,7 @@ UpdateBrandModal.propTypes = {
 
 function UpdateBrandModal(props) {
   const dispatch = useDispatch();
+  const token = useSelector(state => state.token.value)
 
   const [isWait, setIsWait] = useState(false);
 
@@ -58,7 +59,7 @@ function UpdateBrandModal(props) {
       setIsWait(true)    
       const formData = new FormData();
       formData.append('files', file.target.files[0])
-      const res = await imageAPI.create(formData);
+      const res = await imageAPI.create(formData, token);
       const data = res.data;
       setImageId(data[0].id);
       setImagePath(data[0].path);

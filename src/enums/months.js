@@ -5,10 +5,10 @@ module.exports = Object.freeze({
     Mar: "Tháng 3",
     Apr: "Tháng 4",
     May: "Tháng 5",
-    Jun: "Tháng 6",
-    Jul: "Tháng 7",
+    June: "Tháng 6",
+    July: "Tháng 7",
     Aug: "Tháng 8",
-    Sep: "Tháng 9",
+    Sept: "Tháng 9",
     Oct: "Tháng 10",
     Nov: "Tháng 11",
     Dec: "Tháng 12"

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Iconify from '../iconify/Iconify';
 
 function ActionDropdown(props) {
-  const { clickedElement, onUpdateClick, onDeleteClick, onDetailClick, onUpdatePaymentStatus } = props;
+  const { clickedElement, onUpdateClick, onDeleteClick, onDetailClick } = props;
   const [open, setOpen] = useState(null);
 
   const handleOpenMenu = (event) => {
@@ -31,11 +31,6 @@ function ActionDropdown(props) {
     if (onDetailClick)
       onDetailClick(clickedElement)
   }
-
-   function handleUpdatePaymentClick() {
-     handleCloseMenu();
-     if (onUpdatePaymentStatus) onUpdatePaymentStatus(clickedElement);
-   }
 
   return (
     <>
@@ -77,12 +72,6 @@ function ActionDropdown(props) {
           <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
             <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
             Xóa
-          </MenuItem>
-        )}
-        {onUpdatePaymentStatus && (
-          <MenuItem onClick={handleUpdatePaymentClick}>
-            <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-            Xác nhận thanh toán
           </MenuItem>
         )}
       </Popover>

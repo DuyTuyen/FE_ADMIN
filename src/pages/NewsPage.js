@@ -1,46 +1,38 @@
 import { Helmet } from 'react-helmet-async';
 import React, { useEffect, useState } from 'react';
 // @mui
-import {Button, Table, Stack, Typography, Card, TableContainer, TableBody, TableRow, TableCell, MenuItem, FormControl, Select } from '@mui/material';
+import {Button, Table, Stack, Typography, Card, TableContainer, TableBody, TableRow, TableCell } from '@mui/material';
 // components
 
 import { newsAPI } from '../api/ConfigAPI';
 /*eslint-disable */
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { showLoading, closeLoading } from 'src/redux/slices/LoadingSlice';
 import { setErrorValue } from 'src/redux/slices/ErrorSlice';
-import Loading from 'src/components/loading/Loading';
 import Scrollbar from 'src/components/scrollbar/Scrollbar';
-import { UserListHead } from 'src/sections/@dashboard/user';
+import UserListHead from 'src/sections/@dashboard/user/UserListHead';
 
 import Iconify from 'src/components/iconify/Iconify';
 import UpdateNewsModal from 'src/sections/@dashboard/news/UpdateNewsModal';
 import CreateNewsModal from 'src/sections/@dashboard/news/CreateNewsModal';
 import DeleteNewsModal from 'src/sections/@dashboard/news/DeleteNewsModal';
 import Page from '../enums/page';
+import ActionDropdown from 'src/components/Dropdown/ActionDropdown';
+import SearchBar from 'src/components/searchbar';
+import ReactPaginate from 'react-paginate';
 
 const TABLE_HEAD = [
   { id: 'title', label: 'Tiêu đề', alignRight: false },
-  { id: 'content', label: 'Nội dung', alignRight: false },
+  { id: 'image', label: 'Hình ảnh', alignRight: false },
   { id: 'action', label: 'Chỉnh sửa', alignRight: true}
 ];
 
 // ----------------------------------------------------------------------
 export default function NewsPage() {
-  const loading = useSelector(state => state.loading.value)
+  const token = useSelector(state => state.token.value)
 
   const dispatch = useDispatch()
 
-
-
-  const [page, setPage] = useState(0);
-
-  const [order, setOrder] = useState('asc');
-
-  const [selected, setSelected] = useState([]);
-
-  const [orderBy, setOrderBy] = useState('name');
 
   const [newss, setNews] = useState([])
   
@@ -50,32 +42,18 @@ export default function NewsPage() {
 
   const [showDeleteForm, setShowDeleteForm] = useState(false);
 
-  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [pageCount, setPageCount] = useState(0)
+
+  const [activePage, setActivePage] = useState(1)
+
+  const [searchTerm, setSearchTerm] = useState('')
 
   const [clickedElement, setClickedElement] = useState(null);
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
-
-  const handleClick = (event) => {
-    setAnchorEl(event.target);
+  const handlePageClick = (event) => {
+    setActivePage(event.selected + 1);
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleCloseMenu = () => {
-    setOpen(null);
-  };
-
-  const handleOpenFilter = () => {
-    setOpenFilter(true);
-  };
-
-  const handleCloseFilter = () => {
-    setOpenFilter(false);
-  };
 
   function handleCreateFormShow() {
     setShowCreateForm(true)
@@ -105,27 +83,25 @@ export default function NewsPage() {
 
   useEffect(() => {
     async function getNews() {
-      dispatch(showLoading());
       try {
-        const res = await newsAPI.getAll();
+        const res = await newsAPI.getAll(`page=${activePage}&take=5&q=${searchTerm}`,token);
         setNews(res.data.data);
+        setPageCount(res.data.meta.pageCount)
       } catch (error) {
         if (axios.isAxiosError(error))
           alert(error.response ? error.response.data.message : error.message);
         else 
           alert(error.toString());
-      } finally {
-        dispatch(closeLoading());
-      }
+      } 
     }
-    getNews();
-  }, []);
+    if(token)
+      getNews();
+  }, [token, activePage, searchTerm]);
 
   async function handleOnSubmitCreate(data) {
     setShowCreateForm(false)
-    dispatch(showLoading())
     try {
-      const res = await newsAPI.create(data)
+      const res = await newsAPI.create(data, token)
       const newNews = [...newss]
       newNews.unshift(res.data)
       setNews(newNews)
@@ -137,18 +113,13 @@ export default function NewsPage() {
         dispatch(setErrorValue({errorMessage: error.toString(), page: Page.CREATE_NEWS}))
       setShowCreateForm(true)
     }
-    finally {
-      dispatch(closeLoading())
-    }
   }
 
   async function handleOnSubmitUpdate(data) {
     setShowUpdateForm(false)
-    dispatch(showLoading())
     try {
       data['id'] = clickedElement.id
-      console.log(1,data)
-      const resData = await newsAPI.update(data)
+      const resData = await newsAPI.update(data, token)
       const filterNews = newss.filter((r) => r.id !== resData.data.id)
       const newNews = [resData.data, ...filterNews]
       setNews(newNews)
@@ -160,16 +131,12 @@ export default function NewsPage() {
         dispatch(setErrorValue({errorMessage: error.toString(), page: Page.UPDATE_NEWS}))
       setShowUpdateForm(true)
     }
-    finally {
-      dispatch(closeLoading())
-    }
   }
 
   async function handleOnSubmitDelete() {
     setShowDeleteForm(false)
-    dispatch(showLoading())
     try {
-      await newsAPI.delete(clickedElement.id)
+      await newsAPI.delete(clickedElement.id, token)
       const newNews = newss.filter((r) => r.id !== clickedElement.id)
       setNews(newNews)
     }
@@ -179,14 +146,9 @@ export default function NewsPage() {
       else
         alert(error.toString())
     }
-    finally {
-      dispatch(closeLoading())
-    }
   }
 
-  return loading ? (
-    <Loading />
-  ) : (
+  return (
     <>
     <Helmet>
       <title> Tin tức </title>
@@ -202,56 +164,55 @@ export default function NewsPage() {
     </Stack>
 
     <Card>
+    <SearchBar
+          filterName={searchTerm}
+          onFilterName={
+            (e) => {setSearchTerm(e.target.value)}
+          }
+        />
       <Scrollbar>
         <TableContainer sx={{ minWidth: 800 }}>
           <Table>
             <UserListHead
-              order={order}
-              orderBy={orderBy}
               headLabel={TABLE_HEAD}
-              rowCount={10}
-              numSelected={selected.length}
             />
             <TableBody>
               {newss.map((row) => {
-                const { id, title, content} = row;
+                const { id, title, image} = row;
                 return (
                   <TableRow key={id}>
 
                     <TableCell align="left">{title}</TableCell>
-
-                    <TableCell align="left">{content}</TableCell>
+                    <TableCell align="left">
+                      <img src={image?.path} alt={title} width={200} height={200}/>
+                    </TableCell>
 
                     <TableCell align="right">
-
-                    <FormControl>
-                      <Select>
-                      <MenuItem onClick={(e) => {
+                        <ActionDropdown 
+                          clickedElement={row}
+                          onUpdateClick={() => {
                             handleUpdateFormShow(row)
-                            handleCloseMenu()
-                          }}>
-                            <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-                              Chỉnh sửa 
-                          </MenuItem>
-
-                          <MenuItem 
-                            onClick={() => {
-                              handleDeleteFormShow(row)
-                              handleCloseMenu()
-                            }} 
-                            sx={{ color: 'error.main' }}
-                          >
-                            <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
-                            Xoá
-                          </MenuItem>
-                      </Select>
-                    </FormControl>
-                    </TableCell>
+                          }}
+                          onDeleteClick={() => {
+                            handleDeleteFormShow(row)
+                          }}
+                        />
+                      </TableCell>
                   </TableRow>
                 );
               })}
             </TableBody>
           </Table>
+          <ReactPaginate
+          className="pagination"
+                breakLabel="..."
+                nextLabel=">"
+                onPageChange={handlePageClick}
+                pageRangeDisplayed={2}
+                pageCount={pageCount? pageCount: 0}
+                previousLabel="<"
+                renderOnZeroPageCount={null}
+            />
         </TableContainer>
       </Scrollbar>
     </Card>

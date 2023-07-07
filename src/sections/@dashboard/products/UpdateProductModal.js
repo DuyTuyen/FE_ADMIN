@@ -21,10 +21,13 @@ UpdateProductModal.propTypes = {
 
 function UpdateProductModal(props) {
     const dispatch = useDispatch();
+    const token = useSelector(state => state.token.value)
+
     const {errorMessage, page} = useSelector(state => state.error.value)
 
     const [isWait, setIsWait] = useState(false);
     const [name, setName] = useState('')
+    const [isContactToSell, setIsContactToSell] = useState(false);
     const [brandId, setBrandId] = useState('')
     const [categoryId, setCategoryId] = useState('')
     const [imageId, setImageId] = useState('')
@@ -41,6 +44,7 @@ function UpdateProductModal(props) {
             }
             setName(updateProduct.name);
             setDescription( updateProduct.description);
+            setIsContactToSell(updateProduct.isContactToSell);
             setBrandId( updateProduct.brand?.id);
             setCategoryId( updateProduct.category?.id);
             setImageId( updateProduct.image?.id);
@@ -82,7 +86,8 @@ function UpdateProductModal(props) {
             categoryId,
             brandId,
             imageId,
-            description
+            description,
+            isContactToSell
         }
         if (onSubmit)
             onSubmit(data)
@@ -93,7 +98,7 @@ function UpdateProductModal(props) {
           setIsWait(true)    
           const formData = new FormData();
           formData.append('files', file.target.files[0])
-          const res = await imageAPI.create(formData);
+          const res = await imageAPI.create(formData, token);
           const data = res.data;
           setImageId(data[0].id);
           setImagePath(data[0].path);
@@ -112,7 +117,7 @@ function UpdateProductModal(props) {
           if(!imageId){
             return
           }
-          await imageAPI.delete(imageId);
+          await imageAPI.delete(imageId, token);
           e.target.value = null;
           setImageId(null);
           setImagePath(null);
@@ -152,6 +157,14 @@ function UpdateProductModal(props) {
                                 setDescription(data);
                             } }
                         />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3">
+                        <Form.Label>Liên hệ để thanh toán</Form.Label>
+                        <Form.Select onChange={(e) => {setIsContactToSell(e.target.value)}}>
+                            <option selected={isContactToSell} value={true}>Bật</option>
+                            <option  selected={!isContactToSell} value={false}>Tắt</option>
+                        </Form.Select>
                     </Form.Group>
 
                     <Form.Group className="mb-3">

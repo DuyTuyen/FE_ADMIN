@@ -7,7 +7,6 @@ import Page from '../../../enums/page';
 import { imageAPI } from 'src/api/ConfigAPI';
 import axios from 'axios';
 import { setErrorValue } from 'src/redux/slices/ErrorSlice';
-import { set } from 'lodash';
 import Loading from 'src/components/loading/Loading';
 
 CreateBrandModal.propTypes = {
@@ -18,6 +17,7 @@ CreateBrandModal.propTypes = {
 
 function CreateBrandModal(props) {
   const dispatch = useDispatch();
+  const token = useSelector(state => state.token.value)
 
   const [isWait, setIsWait] = useState(false);
   const {errorMessage, page} = useSelector((state) => state.error.value);
@@ -43,6 +43,9 @@ function CreateBrandModal(props) {
         name: brandName
       }
       onSubmit(createBrand);
+      setImageId(null)
+      setImagePath(null)
+      setBrandName('')
     }
   }
 
@@ -51,7 +54,7 @@ function CreateBrandModal(props) {
       setIsWait(true)    
       const formData = new FormData();
       formData.append('files', file.target.files[0])
-      const res = await imageAPI.create(formData);
+      const res = await imageAPI.create(formData, token);
       const data = res.data;
       setImageId(data[0].id);
       setImagePath(data[0].path);
@@ -70,7 +73,7 @@ function CreateBrandModal(props) {
       if(!imageId){
         return
       }
-      await imageAPI.delete(imageId);
+      await imageAPI.delete(imageId, token);
       e.target.value = null;
       setImageId(null);
       setImagePath(null);

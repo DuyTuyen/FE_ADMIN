@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import React, { useEffect, useState } from 'react';
 // @mui
-import {Button, Table, Stack, Typography, Card, TableContainer, TableBody, TableRow, TableCell, MenuItem, FormControl, Select } from '@mui/material';
+import {Button, Table, Stack, Typography, Card, TableContainer, TableBody, TableRow, TableCell } from '@mui/material';
 // components
 
 import { orderAPI } from '../api/ConfigAPI';
@@ -12,13 +12,16 @@ import { showLoading, closeLoading } from 'src/redux/slices/LoadingSlice';
 import { setErrorValue } from 'src/redux/slices/ErrorSlice';
 import Loading from 'src/components/loading/Loading';
 import Scrollbar from 'src/components/scrollbar/Scrollbar';
-import { UserListHead } from 'src/sections/@dashboard/user';
+import UserListHead from 'src/sections/@dashboard/user/UserListHead';
 import {fDate} from '../utils/formatTime';
 import Iconify from 'src/components/iconify/Iconify';
 import UpdateOrderModal from 'src/sections/@dashboard/order/UpdateOrderModal';
 import CreateOrderModal from 'src/sections/@dashboard/order/CreateOrderModal';
-import DeleteOrderModal from 'src/sections/@dashboard/order/DeleteOrderModal';
 import Page from '../enums/page';
+import ActionDropdown from 'src/components/Dropdown/ActionDropdown';
+import ReactPaginate from 'react-paginate';
+import FilterBar from 'src/components/filtertoolbar';
+import FilterOrderModal from 'src/sections/@dashboard/order/FilterOrderModal';
 
 const TABLE_HEAD = [
   { id: 'ID', label: 'Mã định danh', alignRight: false },
@@ -33,15 +36,10 @@ const TABLE_HEAD = [
 
 // ----------------------------------------------------------------------
 export default function OrderPage() {
-  const loading = useSelector(state => state.loading.value)
+  const token = useSelector(state => state.token.value)
 
   const dispatch = useDispatch()
 
-  const [page, setPage] = useState(0);
-
-  const [selected, setSelected] = useState([]);
-
-  const [orderBy, setOrderBy] = useState('name');
 
   const [orders, setOrder] = useState([])
   
@@ -51,22 +49,46 @@ export default function OrderPage() {
 
   const [showDeleteForm, setShowDeleteForm] = useState(false);
 
+  const [showFilterForm, setShowFilterForm] = useState(false);
+
   const [clickedElement, setClickedElement] = useState(null);
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
+  const [pageCount, setPageCount] = useState(0)
 
-  const handleClick = (event) => {
-    setAnchorEl(event.target);
+  const [activePage, setActivePage] = useState(1)
+
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const [filterOptions, setFilterOptions] = useState('')
+
+  const handlePageClick = (event) => {
+    setActivePage(event.selected + 1);
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  function handleShowFilterModal() {
+    setShowFilterForm(true)
+  }
+  function handleCloseFilterModal() {
+    setShowFilterForm(false)
+  }
 
-  const handleCloseMenu = () => {
-    setOpen(null);
-  };
+  function handleOnSubmitFilter(filterOptions) {
+
+    let query = '';
+      query = filterOptions.email !== null ? `email=${filterOptions.email}&`: query
+      query = filterOptions.startDate  !== null && filterOptions.startDate  !== ''? query + `startDate=${filterOptions.startDate}&`: query
+      query = filterOptions.endDate !== null && filterOptions.endDate  !== '' ? query + `endDate=${filterOptions.endDate}&`: query
+      query = filterOptions.status !== null ? query + `status=${filterOptions.status}&`: query      
+      query = filterOptions.isPaid !== null ? query + `isPaid=${filterOptions.isPaid}`: query
+
+    setFilterOptions(query);
+    handleCloseFilterModal();
+  }
+
+  function handleClearFilter() {
+    setFilterOptions('')
+    handleCloseFilterModal();
+  }
 
   function handleCreateFormShow() {
     setShowCreateForm(true)
@@ -85,39 +107,28 @@ export default function OrderPage() {
     setShowUpdateForm(false)
   }
 
-  function handleDeleteFormShow(order) {
-    setClickedElement(order);
-    setShowDeleteForm(true);
-  }
-
-  function handleCloseDeleteFormShow() {
-    setShowDeleteForm(false)
-  }
-
   useEffect(() => {
     async function getOrder() {
-      dispatch(showLoading());
       try {
-        const res = await orderAPI.getAll();
-        console.log(res.data.data)
+        const res = await orderAPI.getAll(`page=${activePage}&take=5&q=${searchTerm}&${filterOptions}`,token);
         setOrder(res.data.data);
+        setPageCount(res.data.meta.pageCount)
       } catch (error) {
         if (axios.isAxiosError(error))
           alert(error.response ? error.response.data.message : error.message);
         else 
           alert(error.toString());
-      } finally {
-        dispatch(closeLoading());
       }
     }
-    getOrder();
-  }, []);
+    if(token)
+      getOrder();
+  }, [token, activePage, searchTerm, filterOptions]);
 
   async function handleOnSubmitCreate(data) {
     setShowCreateForm(false)
     dispatch(showLoading())
     try {
-      const res = await orderAPI.create(data)
+      const res = await orderAPI.create(data, token)
       const newOrder = [...orders]
       newOrder.unshift(res.data)
       setOrder(newOrder)
@@ -139,7 +150,7 @@ export default function OrderPage() {
     dispatch(showLoading())
     try {
       data['id'] = clickedElement.id
-      const resData = await orderAPI.update(data)
+      const resData = await orderAPI.update(data, token)
       const filterOrder = orders.filter((r) => r.id !== resData.data.id)
       const newOrder = [resData.data, ...filterOrder]
       setOrder(newOrder)
@@ -156,28 +167,8 @@ export default function OrderPage() {
     }
   }
 
-  async function handleOnSubmitDelete() {
-    setShowDeleteForm(false)
-    dispatch(showLoading())
-    try {
-      await orderAPI.delete(clickedElement.id)
-      const newOrder = orders.filter((r) => r.id !== clickedElement.id)
-      setOrder(newOrder)
-    }
-    catch (error) {
-      if (axios.isAxiosError(error))
-        alert(error.response ? error.response.data.message : error.message)
-      else
-        alert(error.toString())
-    }
-    finally {
-      dispatch(closeLoading())
-    }
-  }
 
-  return loading ? (
-    <Loading />
-  ) : (
+  return (
     <>
     <Helmet>
       <title> Đơn hàng </title>
@@ -191,15 +182,21 @@ export default function OrderPage() {
         Tạo mới
       </Button>
     </Stack>
-
+    <Stack>
+      <FilterBar
+        filterName={searchTerm}
+        onFilterName={
+          (e) => {setSearchTerm(e.target.value)}
+        }
+        onShowFilter={handleShowFilterModal}
+      />
+    </Stack>
     <Card>
       <Scrollbar>
         <TableContainer sx={{ minWidth: 800 }}>
           <Table>
             <UserListHead
               headLabel={TABLE_HEAD}
-              rowCount={10}
-              numSelected={selected.length}
             />
             <TableBody>
               {orders.map((row) => {
@@ -231,35 +228,29 @@ export default function OrderPage() {
                       fDate(createdAt)
                     }</TableCell>
 
-                    <TableCell align="right">
-                    <FormControl>
-                      <Select>
-                          <MenuItem onClick={(e) => {
+                    <TableCell align="left">
+                        <ActionDropdown
+                          clickedElement={row}
+                          onUpdateClick={() => {
                             handleUpdateFormShow(row)
-                            handleCloseMenu()
-                          }}>
-                            <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-                              Chỉnh sửa 
-                          </MenuItem>
-
-                          <MenuItem 
-                            onClick={() => {
-                              handleDeleteFormShow(row)
-                              handleCloseMenu()
-                            }} 
-                            sx={{ color: 'error.main' }}
-                          >
-                            <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
-                            Xoá
-                          </MenuItem>
-                      </Select>
-                    </FormControl>
-                    </TableCell>
+                          }}
+                        />
+                      </TableCell>
                   </TableRow>
                 );
               })}
             </TableBody>
           </Table>
+          <ReactPaginate
+          className="pagination"
+            breakLabel="..."
+            nextLabel=">"
+            onPageChange={handlePageClick}
+            pageRangeDisplayed={2}
+            pageCount={pageCount? pageCount: 0}
+            previousLabel="<"
+            renderOnZeroPageCount={null}
+          />
         </TableContainer>
       </Scrollbar>
     </Card>
@@ -282,11 +273,11 @@ export default function OrderPage() {
         onClose={() => handleCloseUpdateFormShow()}
       />
 
-    <DeleteOrderModal
-        isShow={showDeleteForm}
-        activeOrder={clickedElement}
-        onSubmit={() => {handleOnSubmitDelete()}}
-        onClose={() => handleCloseDeleteFormShow()}
+      <FilterOrderModal
+        isShow={showFilterForm}
+        onSubmit={handleOnSubmitFilter}
+        onClear={handleClearFilter}
+        onClose={() => handleCloseFilterModal()}
       />
   </>
   );

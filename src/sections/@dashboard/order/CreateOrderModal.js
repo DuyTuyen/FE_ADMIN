@@ -30,7 +30,6 @@ function CreateOrderModal(props) {
   const [isShowAddDetail, setIsShowAddDetail] = useState(false);
 
   const handleShowAddDetailModal = () => {
-    console.log()
     setIsShowAddDetail(true)
     onClose()
 
@@ -57,6 +56,12 @@ function CreateOrderModal(props) {
         details
       }
       onSubmit(createOrder);
+      setTotalPrice(0)
+      setPhone('')
+      setEmail('')
+      setName('')
+      setDetails([])
+      setName('')
     }
   }
 

@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { useEffect, useState } from 'react';
 // @mui
-import {Button, Table, Stack, Typography, Card, TableContainer, TableBody, TableRow, TableCell, Popover, MenuItem, FormControl, Select } from '@mui/material';
+import {Button, Table, Stack, Typography, Card, TableContainer, TableBody, TableRow, TableCell} from '@mui/material';
 // components
 
 import { aboutCompanyAPI } from '../api/ConfigAPI';
@@ -10,40 +10,30 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { showLoading, closeLoading } from 'src/redux/slices/LoadingSlice';
 import { setErrorValue } from 'src/redux/slices/ErrorSlice';
-import Loading from 'src/components/loading/Loading';
 import Scrollbar from 'src/components/scrollbar/Scrollbar';
-import { UserListHead } from 'src/sections/@dashboard/user';
+import UserListHead from 'src/sections/@dashboard/user/UserListHead';
 
 import Iconify from 'src/components/iconify/Iconify';
 import CreateAboutCompanyModal from 'src/sections/@dashboard/about-company/CreateAboutCompanyModal';
 import UpdateAboutCompanyModal from 'src/sections/@dashboard/about-company/UpdateAboutCompanyModal';
 import DeleteAboutCompanyModal from 'src/sections/@dashboard/about-company/DeleteAboutCompanyModal';
 import Page from '../enums/page'
+import ActionDropdown from 'src/components/Dropdown/ActionDropdown';
+import SearchBar from 'src/components/searchbar';
+import ReactPaginate from 'react-paginate';
 
 const TABLE_HEAD = [
   { id: 'title', label: 'Tiêu đề', alignRight: false },
-  { id: 'content', label: 'Nội dung', alignRight: false },
   { id: 'action', label: 'Chỉnh sửa', alignRight: true}
 ];
 
 // ----------------------------------------------------------------------
 export default function AboutCompanyPage() {
-  const loading = useSelector(state => state.loading.value)
+  const token = useSelector(state => state.token.value)
 
   const dispatch = useDispatch()
 
-
-  const [open, setOpen] = useState(null);
-
-  const [page, setPage] = useState(0);
-
-  const [order, setOrder] = useState('asc');
-
-  const [selected, setSelected] = useState([]);
-
-  const [orderBy, setOrderBy] = useState('name');
-
-  const [aboutCompanys, setAboutCompany] = useState([{}])
+  const [aboutCompany, setAboutCompany] = useState([])
   
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -51,25 +41,14 @@ export default function AboutCompanyPage() {
 
   const [showDeleteForm, setShowDeleteForm] = useState(false);
 
-  const [showDetailModal, setShowDetailModal] = useState(false);
-
   const [clickedElement, setClickedElement] = useState(null);
 
-  const handleOpenMenu = (event) => {
-    setOpen(event.currentTarget);
-  };
+  const [pageCount, setPageCount] = useState(null)
 
-  const handleCloseMenu = () => {
-    setOpen(null);
-  };
+  const [activePage, setActivePage] = useState(1)
+  
+  const [searchTerm, setSearchTerm] = useState('')
 
-  const handleOpenFilter = () => {
-    setOpenFilter(true);
-  };
-
-  const handleCloseFilter = () => {
-    setOpenFilter(false);
-  };
 
   function handleCreateFormShow() {
     setShowCreateForm(true)
@@ -97,21 +76,17 @@ export default function AboutCompanyPage() {
     setShowDeleteForm(false)
   }
 
-  function handleDetailModalShow(aboutCompany) {
-    setClickedElement(aboutCompany);
-    setShowDetailModal(true);
-  }
-
-  function handleCloseDetailModalShow() {
-    setShowDetailModal(false)
-  }
+  const handlePageClick = (event) => {
+    setActivePage(event.selected + 1);
+  };  
 
   useEffect(() => {
     async function getAboutCompany() {
       dispatch(showLoading());
       try {
-        const res = await aboutCompanyAPI.getAll();
+        const res = await aboutCompanyAPI.getAll(`page=${activePage}&take=5&q=${searchTerm}`,token);
         setAboutCompany(res.data.data);
+        setPageCount(res.data.meta.pageCount)
       } catch (error) {
         if (axios.isAxiosError(error))
           alert(error.response ? error.response.data.message : error.message);
@@ -121,15 +96,16 @@ export default function AboutCompanyPage() {
         dispatch(closeLoading());
       }
     }
-    getAboutCompany();
-  }, []);
+    if(token)
+     getAboutCompany();
+  }, [token, activePage, searchTerm]);
 
   async function handleOnSubmitCreate(data) {
     setShowCreateForm(false)
     dispatch(showLoading())
     try {
-      const res = await aboutCompanyAPI.create(data)
-      const newAboutCompany = [...aboutCompanys]
+      const res = await aboutCompanyAPI.create(data, token)
+      const newAboutCompany = [...aboutCompany]
       newAboutCompany.unshift(res.data)
       setAboutCompany(newAboutCompany)
     }
@@ -150,8 +126,8 @@ export default function AboutCompanyPage() {
     dispatch(showLoading())
     try {
       data['id'] = clickedElement.id
-      const resData = await aboutCompanyAPI.update(data)
-      const filterAboutCompany = aboutCompanys.filter((r) => r.id !== resData.data.id)
+      const resData = await aboutCompanyAPI.update(data, token)
+      const filterAboutCompany = aboutCompany.filter((r) => r.id !== resData.data.id)
       const newAboutCompany = [resData.data, ...filterAboutCompany]
       setAboutCompany(newAboutCompany)
     }
@@ -171,8 +147,8 @@ export default function AboutCompanyPage() {
     setShowDeleteForm(false)
     dispatch(showLoading())
     try {
-      await aboutCompanyAPI.delete(clickedElement.id)
-      const newAboutCompany = aboutCompanys.filter((r) => r.id !== clickedElement.id)
+      await aboutCompanyAPI.delete(clickedElement.id, token)
+      const newAboutCompany = aboutCompany.filter((r) => r.id !== clickedElement.id)
       setAboutCompany(newAboutCompany)
     }
     catch (error) {
@@ -186,9 +162,7 @@ export default function AboutCompanyPage() {
     }
   }
 
-  return loading ? (
-    <Loading />
-  ) : (
+  return (
     <>
     <Helmet>
       <title> Bài viết về công ty </title>
@@ -204,18 +178,22 @@ export default function AboutCompanyPage() {
     </Stack>
 
     <Card>
+    <SearchBar
+          filterName={searchTerm}
+          onFilterName={
+            (e) => {setSearchTerm(e.target.value)}
+          }
+        />
       <Scrollbar>
         <TableContainer sx={{ minWidth: 800 }}>
           <Table>
             <UserListHead
-              order={order}
-              orderBy={orderBy}
+          
               headLabel={TABLE_HEAD}
-              rowCount={10}
-              numSelected={selected.length}
+        
             />
             <TableBody>
-              {aboutCompanys.map((row) => {
+              {aboutCompany.map((row) => {
                 const { id, title, content} = row;
                 // const selectedUser = selected.indexOf(name) !== -1;
 
@@ -224,37 +202,32 @@ export default function AboutCompanyPage() {
 
                     <TableCell align="left">{title}</TableCell>
 
-                    <TableCell align="left">{content}</TableCell>
-
                     <TableCell align="right">
-                    <FormControl>
-                      <Select>
-                      <MenuItem onClick={(e) => {
+                        <ActionDropdown 
+                          clickedElement={row}
+                          onUpdateClick={() => {
                             handleUpdateFormShow(row)
-                            handleCloseMenu()
-                          }}>
-                            <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-                              Chỉnh sửa 
-                          </MenuItem>
-
-                          <MenuItem 
-                            onClick={() => {
-                              handleDeleteFormShow(row)
-                              handleCloseMenu()
-                            }} 
-                            sx={{ color: 'error.main' }}
-                          >
-                            <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
-                            Xoá
-                          </MenuItem>
-                      </Select>
-                    </FormControl>
-                    </TableCell>
+                          }}
+                          onDeleteClick={() => {
+                            handleDeleteFormShow(row)
+                          }}
+                        />
+                      </TableCell>
                   </TableRow>
                 );
               })}
             </TableBody>
           </Table>
+          <ReactPaginate
+          className="pagination"
+                breakLabel="..."
+                nextLabel=">"
+                onPageChange={handlePageClick}
+                pageRangeDisplayed={5}
+                pageCount={pageCount? pageCount: 0}
+                previousLabel="<"
+                renderOnZeroPageCount={null}
+            />
         </TableContainer>
       </Scrollbar>
     </Card>
@@ -282,6 +255,6 @@ export default function AboutCompanyPage() {
         onSubmit={() => handleOnSubmitDelete()}
         onClose={() => handleCloseDeleteFormShow()}
       />
-  </>
-  );
+    </>
+  )
 }

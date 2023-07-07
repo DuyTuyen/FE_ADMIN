@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Form, Button } from 'react-bootstrap';
+import { Modal, Form, Button, Image } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { Alert } from '@mui/material';
 import Page from '../../../enums/page';
 
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import Loading from 'src/components/loading/Loading';
+import { setErrorValue } from 'src/redux/slices/ErrorSlice';
+import axios from 'axios';
+import { imageAPI } from 'src/api/ConfigAPI';
 
 UpdateNewsModal.propTypes = {
   isShow: PropTypes.bool,
@@ -17,12 +21,17 @@ UpdateNewsModal.propTypes = {
 
 function UpdateNewsModal(props) {
   const dispatch = useDispatch();
+  const token = useSelector(state => state.token.value)
 
   const {errorMessage, page} = useSelector((state) => state.error.value);
   const { isShow, onClose, onSubmit, activeNews } = props;
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [isWait, setIsWait] = useState(false);
+  const [imageId, setImageId] = useState(null);
+  const [imagePath, setImagePath] = useState(null);
+  const [description, setDescription] = useState('');
 
 
   function handleClose() {
@@ -30,19 +39,70 @@ function UpdateNewsModal(props) {
   }
 
   useEffect(() => {
-    setTitle(activeNews?.title)
-    setContent(activeNews?.content)
+    if(!activeNews){
+      return;
+    }
+
+    setTitle(activeNews.title)
+    setContent(activeNews.content)
+    setDescription(activeNews.description)
+    setImageId(activeNews.image?.id);
+    setImagePath(activeNews.image?.path);
+
   },[activeNews])
 
   function handleUpdateNews(e) {
     e.preventDefault();
-  
+
+    if(isWait){
+      window.alert('Vui lòng chờ hình ảnh được tải lên');
+      return;
+    }
+
     if (onSubmit){
       const updateNews = {
         title,
-        content
+        content,
+        description,
+        imageId
       }
       onSubmit(updateNews);
+    }
+  }
+
+  async function handleUploadImage(file){
+    try {
+      setIsWait(true)    
+      const formData = new FormData();
+      formData.append('files', file.target.files[0])
+      const res = await imageAPI.create(formData, token);
+      const data = res.data;
+      setImageId(data[0].id);
+      setImagePath(data[0].path);
+    } catch (error) {
+      if (axios.isAxiosError(error))
+        dispatch(setErrorValue({errorMessage: error.response ? error.response.data.message : error.message, page: Page.UPDATE_NEWS}));
+      else 
+        dispatch(setErrorValue({errorMessage: error.toString(), page: Page.UPDATE_NEWS}));
+    } finally{
+      setIsWait(false);
+    }
+  }
+
+  async function handleDeleteImage(e){
+    try {
+      if(!imageId){
+        return
+      }
+      await imageAPI.delete(imageId, token);
+      e.target.value = null;
+      setImageId(null);
+      setImagePath(null);
+    } catch (error) {
+      if (axios.isAxiosError(error))
+        dispatch(setErrorValue({errorMessage: error.response ? error.response.data.message : error.message, page: Page.UPDATE_NEWS}));
+      else 
+        dispatch(setErrorValue({errorMessage: error.toString(), page: Page.UPDATE_NEWS}));
     }
   }
 
@@ -78,6 +138,24 @@ function UpdateNewsModal(props) {
                       setContent(data);
                   } }
               />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+              <Form.Label>Mô tả</Form.Label>
+              <textarea value={description} onChange={(e) => {setDescription(e.target.value)}} name="w3review" rows="4" cols="50" />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>
+              Hình ảnh
+              {
+                 isWait ? 
+                 <Loading></Loading>: 
+                 imageId ? <Image  height="100" width="100" style={{marginTop: '10px'}}src={imagePath} alt="brand-image" />: <></>
+              }
+              </Form.Label>
+            <Form.Control accept="image/*" type="file" min="1" placeholder="Chọn hình ảnh"  onChange={(e) => handleUploadImage(e)} onClick={(e) => handleDeleteImage(e)}/>
+            <Form.Control type="hidden" value={imageId}/>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>

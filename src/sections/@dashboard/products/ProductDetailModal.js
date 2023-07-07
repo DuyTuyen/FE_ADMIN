@@ -1,17 +1,22 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Modal } from 'react-bootstrap';
-import { Button, Card, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
+import { Button, Card, NativeSelect, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
 import Scrollbar from 'src/components/scrollbar/Scrollbar';
 import { useState } from 'react';
 import Iconify from 'src/components/iconify/Iconify';
 import {  benefitValueAPI, productAPI, productBenefitAPI, productPackageAPI } from '../../../api/ConfigAPI';
-import CreateProductPackageModal from './createProductPackageModal';
+import CreateProductPackageModal from './CreateProductPackageModal';
 import CreateProductBenefitModal from './CreateProductBenefitModal';
 import axios from 'axios';
 import { setErrorValue } from 'src/redux/slices/ErrorSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Page from '../../../enums/page';
+import months from '../../../enums/transLateTimeRange'
+import { fCurrency } from 'src/utils/formatNumber';
+import UpdateProductPackageModal from './UpdateProductPackageModal';
+import DeleteProductBenefitModal from './DeleteProductBenefitModal';
+import DeleteProductPackageModal from './DeleteProductPackageModal';
 
 ProductDetailModal.propTypes = {
     isShow: PropTypes.bool,
@@ -20,6 +25,7 @@ ProductDetailModal.propTypes = {
 };
 
 function ProductDetailModal(props) {
+    const token = useSelector(state => state.token.value);
     const dispatch = useDispatch();
     const { isShow, onClose, product } = props
     const updateValueRef = useRef(null)
@@ -28,6 +34,41 @@ function ProductDetailModal(props) {
 
     const [showCreatePackageForm, setShowCreatePackageForm] = useState(false);
     const [showCreateBenefitForm, setShowCreateBenefitForm] = useState(false);
+    const [showUpdatePackageForm, setShowUpdatePackageForm] = useState(false);
+    const [showDeletePackageForm, setShowDeletePackageForm] = useState(false);
+    const [showDeleteBenefitForm, setShowDeleteBenefitForm] = useState(false);
+
+    const [selectedPackage, setSelectedPackage] = useState(null);
+    const [selectedBenefit, setSelectedBenefit] = useState(null);
+  
+
+    function handleShowUpdatePackageForm(selectedItem) {
+      setShowUpdatePackageForm(true);
+      setSelectedPackage(selectedItem)
+    }
+  
+    function handleCloseUpdatePackageForm() {
+      setShowUpdatePackageForm(false);
+    }
+
+    function handleShowDeletePackageForm(selectedItem) {
+      setShowDeletePackageForm(true);
+      setSelectedPackage(selectedItem)
+    }
+  
+    function handleCloseDeletePackageForm() {
+      setShowDeletePackageForm(false);
+    }
+
+    function handleShowDeleteBenefitForm(selectedItem) {
+      console.log(selectedItem)
+      setShowDeleteBenefitForm(true);
+      setSelectedBenefit(selectedItem)
+    }
+  
+    function handleCloseDeleteBenefitForm() {
+      setShowDeleteBenefitForm(false);
+    }
 
     function handleCreatePackageFormShow() {
       setShowCreatePackageForm(true);
@@ -44,6 +85,7 @@ function ProductDetailModal(props) {
     function handleCloseCreateBenefitFormShow() {
       setShowCreateBenefitForm(false);
     }
+
     function handleClose() {
         if (onClose)
             onClose()
@@ -89,7 +131,7 @@ function ProductDetailModal(props) {
     async function handleCreatePackage(data){
       try {
         handleCloseCreatePackageFormShow()
-        const resCreatePackage = await productPackageAPI.create(data);
+        const resCreatePackage = await productPackageAPI.create(data, token);
         const newCreatePackage = resCreatePackage.data;
         const newProductPackages = [...productPackages];
         newProductPackages.push(newCreatePackage)
@@ -109,15 +151,13 @@ function ProductDetailModal(props) {
           dispatch(setErrorValue({errorMessage: error.response ? error.response.data.message : error.message, page: Page.CREATE_PACKAGE}))
         else
           dispatch(setErrorValue({errorMessage: error.toString(), page: Page.CREATE_PACKAGE}))
-      } finally {
-        handleCreatePackageFormShow()
       }
     }
 
     async function handleCreateBenefit(data){
       try {
         handleCloseCreateBenefitFormShow()
-        const res = await productBenefitAPI.create(data);
+        const res = await productBenefitAPI.create(data, token);
         const newProductBenefits = [...productBenefits];
         newProductBenefits.push(res.data)
 
@@ -138,14 +178,12 @@ function ProductDetailModal(props) {
           dispatch(setErrorValue({errorMessage: error.response ? error.response.data.message : error.message, page: Page.CREATE_BENEFIT}))
         else
           dispatch(setErrorValue({errorMessage: error.toString(), page: Page.CREATE_BENEFIT}))
-      } finally {
-        handleCreateBenefitFormShow()
       }
     }
 
     async function handelUpdateBenefitValue(id, value){
       try {
-        await benefitValueAPI.update(id, {value})
+        await benefitValueAPI.update({id, value}, token)
         const newBenefits = productBenefits.map(benefit => {
           const foundBenefitValue = benefit.benefitValues.find(b => b.id === id)
           
@@ -164,13 +202,62 @@ function ProductDetailModal(props) {
         alert(error)
       } 
     }
+
+    async function handleUpdateProductPackage(data) {
+      setShowUpdatePackageForm(false)
+      try {
+        data['id'] = selectedPackage.id
+        const resData = await productPackageAPI.update(data, token)
+        const filterProductPackages = productPackages.filter((r) => r.id !== resData.data.id)
+        const newProductPackages = [resData.data, ...filterProductPackages]
+        setProductPackages(newProductPackages)
+      }
+      catch (error) {
+        if (axios.isAxiosError(error))
+          dispatch(setErrorValue({errorMessage: error.response ? error.response.data.message : error.message, page: Page.UPDATE_PRODUCT_PACKAGE}))
+        else
+          dispatch(setErrorValue({errorMessage: error.toString(), page: Page.UPDATE_PRODUCT_PACKAGE}))
+          setShowUpdatePackageForm(true)
+      }
+    }
+
+    
+    async function handleDeleteProductPackage() {
+      setShowDeletePackageForm(false)
+      try {
+        await productPackageAPI.delete(selectedPackage.id, token)
+        const newProductPackages = productPackages.filter((r) => r.id !== selectedPackage.id)
+        setProductPackages(newProductPackages)
+      }
+      catch (error) {
+        if (axios.isAxiosError(error))
+          alert(error.response ? error.response.data.message : error.message)
+        else
+          alert(error.toString())
+      }
+    }
+
+    async function handleDeleteProductBenefit() {
+      setShowDeleteBenefitForm(false)
+      try {
+        await productBenefitAPI.delete(selectedBenefit.id, token)
+        const newProductBenefits = productBenefits.filter((r) => r.id !== selectedBenefit.id)
+        setProductBenefits(newProductBenefits)
+      }
+      catch (error) {
+        if (axios.isAxiosError(error))
+          alert(error.response ? error.response.data.message : error.message)
+        else
+          alert(error.toString())
+      }
+    }
+  
   
     return (
       <>
         <Modal size="xl" style={{ zIndex: 10000 }} show={isShow} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>{product?.name}</Modal.Title>
-              Các gói sản phẩm
           </Modal.Header>
           <Modal.Body>
             <Card>
@@ -180,9 +267,24 @@ function ProductDetailModal(props) {
                     <TableHead>
                       <TableRow>
                       <TableCell></TableCell>
-                        {
-                          productPackages?.map(productPackage => (
-                            <TableCell>{productPackage.name}</TableCell>
+                              {
+                                productPackages?.map(productPackage => (
+                                  <TableCell  width="400">
+                                    <NativeSelect id="select"
+                                    onChange={(e) => {
+                                      if(Number(e.target.value) === 1){
+                                        handleShowUpdatePackageForm(productPackage)
+
+                                      }else if(Number(e.target.value) === 0) {
+                                        handleShowDeletePackageForm(productPackage)
+                                      }
+                                      e.target.selectedIndex = 0;
+                                    }}>
+                                      <option selected>{productPackage.name}</option>
+                                      <option value={1}>Chỉnh Sửa</option>
+                                      <option value={0}>Xoá</option>
+                                    </NativeSelect>  
+                                </TableCell>
                           ))
                         }
                         <TableCell>
@@ -193,16 +295,73 @@ function ProductDetailModal(props) {
                       </TableRow>
                     </TableHead>
                     <TableBody>
+                    {
+                      <TableRow >
+                        <TableCell>Số người sở hữu</TableCell>
+                        {
+                          productPackages?.map(productPackage => (
+                              <TableCell className="package_title">
+                                  {
+                                  productPackage.userNumber
+                                  }                                                                          
+                                  
+                              </TableCell>
+                          ))
+                        }
+                      </TableRow>
+                      }
+                      {
+                        <TableRow >
+                            <TableCell>Thời hạn sử dụng</TableCell>
+                            {
+                              productPackages?.map(productPackage => (
+                                  <TableCell className="package_title">
+                                      {
+                                      `${productPackage.timeRangeNumber} ${months[productPackage.timeRange]}` 
+                                      }                                                                          
+                                      
+                                  </TableCell>
+                              ))
+                            }
+                        </TableRow>
+                      }
+                      {
+                        <TableRow >
+                            <TableCell>Giá</TableCell>
+                            {
+                              productPackages?.map(productPackage => (
+                                  <TableCell className="package_title">
+                                      {
+                                        fCurrency(productPackage.price)
+                                      }                                                                          
+                                  </TableCell>
+                              ))
+                            }
+                        </TableRow>
+                      }
                       {
                         productBenefits?.map(benefit => (
                           <TableRow >
-                            <TableCell align="left">{benefit.name}</TableCell>
+                            <TableCell component="th" scope="row" width={450} align="left">
+                              <NativeSelect id="select"
+                                onChange={(e) => {
+                                  if(Number(e.target.value) === 1){
+                                    handleShowDeleteBenefitForm(benefit)
+                                  }
+                                  e.target.selectedIndex = 0;
+                              }}>
+                                <option selected>{benefit.name}</option>
+                                <option value={1}>Xoá</option>
+                              </NativeSelect>  
+                            </TableCell>
+                            
                             {
                               benefit.benefitValues.map(benefitValue => (
                                 <TableCell align="left">
+                                  
                                   <TextField
                                     variant="standard"
-                                    defaultValue={benefitValue.value}
+                                    defaultValue={benefitValue? benefitValue.value: ''}
                                     onChange={
                                       (e) => {
                                         if(updateValueRef.current){
@@ -226,8 +385,8 @@ function ProductDetailModal(props) {
                         ))
                       }
                           <TableRow >
-                            <TableCell align="left">
-                                <Button onClick={() => {handleCreateBenefitFormShow(true)}} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
+                            <TableCell  align="left">
+                                <Button style={{ width: 150 }} onClick={() => {handleCreateBenefitFormShow(true)}} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
                                 Quyền lợi
                               </Button>
                             </TableCell>
@@ -249,6 +408,24 @@ function ProductDetailModal(props) {
           productId={product? product?.id: ''}
         />
 
+        <UpdateProductPackageModal
+          isShow={showUpdatePackageForm}
+          onClose={() => {
+            handleCloseUpdatePackageForm(false);
+          }}
+          onSubmit={handleUpdateProductPackage}
+          activeProductPackage={selectedPackage}
+        />
+
+        <DeleteProductPackageModal
+          isShow={showDeletePackageForm}
+          onClose={() => {
+            handleCloseDeletePackageForm(false);
+          }}
+          onSubmit={handleDeleteProductPackage}
+          activeProductPackage={selectedPackage}
+        />
+
         <CreateProductBenefitModal
           isShow={showCreateBenefitForm}
           onClose={() => {
@@ -257,6 +434,15 @@ function ProductDetailModal(props) {
           onSubmit={handleCreateBenefit}
           productId={product? product?.id: ''}
         />    
+
+        <DeleteProductBenefitModal
+          isShow={showDeleteBenefitForm}
+          onClose={() => {
+            handleCloseDeleteBenefitForm(false);
+          }}
+          onSubmit={handleDeleteProductBenefit}
+          activeProductBenefit={selectedBenefit}
+        />
       </>
     );
 }

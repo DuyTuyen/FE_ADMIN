@@ -17,6 +17,7 @@ CreateCategoryModal.propTypes = {
 
 function CreateCategoryModal(props) {
   const dispatch = useDispatch();
+  const token = useSelector(state => state.token.value)
 
   const [isWait, setIsWait] = useState(false);
   const {errorMessage, page} = useSelector((state) => state.error.value);
@@ -42,6 +43,9 @@ function CreateCategoryModal(props) {
         name: categoryName
       }
       onSubmit(createCategory);
+      setCategoryName('')
+      setImageId(null)
+      setImagePath(null)
     }
   }
 
@@ -50,7 +54,7 @@ function CreateCategoryModal(props) {
       setIsWait(true)    
       const formData = new FormData();
       formData.append('files', file.target.files[0])
-      const res = await imageAPI.create(formData);
+      const res = await imageAPI.create(formData, token);
       const data = res.data;
       setImageId(data[0].id);
       setImagePath(data[0].path);
@@ -69,7 +73,7 @@ function CreateCategoryModal(props) {
       if(!imageId){
         return
       }
-      await imageAPI.delete(imageId);
+      await imageAPI.delete(imageId, token);
       e.target.value = null;
       setImageId(null);
       setImagePath(null);

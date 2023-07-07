@@ -22,10 +22,12 @@ CreateProductModal.propTypes = {
 function CreateProductModal(props) {
     const dispatch = useDispatch();
     const {errorMessage, page} = useSelector(state => state.error.value)
+    const token = useSelector(state => state.token.value)
 
     const [isWait, setIsWait] = useState(false);
     const [name, setName] = useState('')
     const [brandId, setBrandId] = useState('')
+    const [isContactToSell, setIsContactToSell] = useState(true)
     const [categoryId, setCategoryId] = useState('')
     const [imageId, setImageId] = useState('')
     const [imagePath, setImagePath] = useState(null)
@@ -42,6 +44,8 @@ function CreateProductModal(props) {
                     const resCategories = await categoryAPI.getAll();
                     setBrands(resBrands.data.data);
                     setCategories(resCategories.data.data);
+                    setBrandId(resBrands.data.data[0].id)
+                    setCategoryId(resCategories.data.data[0].id)
                 } catch (error) {
                  alert(error);   
                 }
@@ -69,10 +73,19 @@ function CreateProductModal(props) {
             categoryId,
             brandId,
             imageId,
-            description
+            description,
+            isContactToSell
         }
         if (onSubmit)
             onSubmit(data)
+        setName('')
+        setCategoryId('')
+        setBrandId('')
+        setDescription('')
+        setBrandId('')
+        setImageId(null)
+        setImagePath(null)
+        setIsContactToSell(true)
     }
 
     async function handleUploadImage(file){
@@ -80,7 +93,7 @@ function CreateProductModal(props) {
           setIsWait(true)    
           const formData = new FormData();
           formData.append('files', file.target.files[0])
-          const res = await imageAPI.create(formData);
+          const res = await imageAPI.create(formData, token);
           const data = res.data;
           setImageId(data[0].id);
           setImagePath(data[0].path);
@@ -99,7 +112,7 @@ function CreateProductModal(props) {
           if(!imageId){
             return
           }
-          await imageAPI.delete(imageId);
+          await imageAPI.delete(imageId, token);
           e.target.value = null;
           setImageId(null);
           setImagePath(null);
@@ -139,6 +152,14 @@ function CreateProductModal(props) {
                                 setDescription(data);
                             } }
                         />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3">
+                        <Form.Label>Bật thanh toán online</Form.Label>
+                        <Form.Select onChange={(e) => {setIsContactToSell(e.target.value)}}>
+                            <option  value={true}>Bật</option>
+                            <option  value={false}>Tắt</option>
+                        </Form.Select>
                     </Form.Group>
 
                     <Form.Group className="mb-3">

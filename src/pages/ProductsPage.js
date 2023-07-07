@@ -1,51 +1,43 @@
 import { Helmet } from 'react-helmet-async';
 import { useEffect, useState } from 'react';
 // @mui
-import {Button, Table, Stack, Typography, Card, TableContainer, TableBody, TableRow, TableCell, Popover, MenuItem } from '@mui/material';
+import {Button, Table, Stack, Typography, Card, TableContainer, TableBody, TableRow, TableCell } from '@mui/material';
 // components
 
 import {productAPI } from '../api/ConfigAPI';
 /*eslint-disable */
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { showLoading, closeLoading } from 'src/redux/slices/LoadingSlice';
+import { closeLoading } from 'src/redux/slices/LoadingSlice';
 import { setErrorValue } from 'src/redux/slices/ErrorSlice';
-import { useNavigate } from 'react-router-dom';
-import Loading from 'src/components/loading/Loading';
+
 import CreateProductModal from 'src/sections/@dashboard/products/CreateProductModal';
 import Scrollbar from 'src/components/scrollbar/Scrollbar';
-import { UserListHead } from 'src/sections/@dashboard/user';
+import UserListHead from 'src/sections/@dashboard/user/UserListHead';
 import { Image } from 'react-bootstrap';
 import UpdateProductModal from 'src/sections/@dashboard/products/UpdateProductModal';
 import Iconify from 'src/components/iconify/Iconify';
 import ProductDetailModal from 'src/sections/@dashboard/products/ProductDetailModal';
 import Page from '../enums/page';
+import ActionDropdown from 'src/components/Dropdown/ActionDropdown';
+import SearchBar from 'src/components/searchbar';
+import ReactPaginate from 'react-paginate';
+import DeleteProductModal from 'src/sections/@dashboard/products/DeleteProductModal';
 
 const TABLE_HEAD = [
   { id: 'name', label: 'Tên sản phẩm', alignRight: false },
   { id: 'brand', label: 'Thương hiệu', alignRight: false },
   { id: 'category', label: 'Loại sản phẩm', alignRight: false },
+  { id: 'contactToSale', label: 'Liên hệ để thanh toán', alignRight: false },
   { id: 'image', label: 'Hình ảnh', alignRight: false },
   {id: 'action', label: 'Chỉnh sửa', alignRight: true}
 ];
 
 // ----------------------------------------------------------------------
 export default function ProductsPage() {
-  const loading = useSelector(state => state.loading.value)
+  const token = useSelector(state => state.token.value)
 
   const dispatch = useDispatch()
-
-  const navigate = useNavigate()
-
-  const [open, setOpen] = useState(null);
-
-  const [page, setPage] = useState(0);
-
-  const [order, setOrder] = useState('asc');
-
-  const [selected, setSelected] = useState([]);
-
-  const [orderBy, setOrderBy] = useState('name');
 
   const [products, setProducts] = useState([{}])
   
@@ -59,20 +51,15 @@ export default function ProductsPage() {
 
   const [clickedElement, setClickedElement] = useState(null);
 
-  const handleOpenMenu = (event) => {
-    setOpen(event.currentTarget);
-  };
+  const [pageCount, setPageCount] = useState(0)
 
-  const handleCloseMenu = () => {
-    setOpen(null);
-  };
+  const [activePage, setActivePage] = useState(1)
 
-  const handleOpenFilter = () => {
-    setOpenFilter(true);
-  };
+  const [searchTerm, setSearchTerm] = useState('')
 
-  const handleCloseFilter = () => {
-    setOpenFilter(false);
+
+  const handlePageClick = (event) => {
+    setActivePage(event.selected + 1);
   };
 
   function handleCreateFormShow() {
@@ -112,10 +99,10 @@ export default function ProductsPage() {
 
   useEffect(() => {
     async function getProducts() {
-      dispatch(showLoading());
       try {
-        const res = await productAPI.getAll();
+        const res = await productAPI.getAll(`page=${activePage}&take=5&q=${searchTerm}`,token);
         setProducts(res.data.data);
+        setPageCount(res.data.meta.pageCount)
       } catch (error) {
         if (axios.isAxiosError(error))
           alert(error.response ? error.response.data.message : error.message);
@@ -125,14 +112,14 @@ export default function ProductsPage() {
         dispatch(closeLoading());
       }
     }
-    getProducts();
-  }, []);
+    if(token)
+      getProducts();
+  }, [token, activePage, searchTerm]);
 
   async function handleOnSubmitCreate(data) {
     setShowCreateForm(false)
-    dispatch(showLoading())
     try {
-      const res = await productAPI.create(data)
+      const res = await productAPI.create(data, token)
       const newProducts = [...products]
       newProducts.unshift(res.data)
       setProducts(newProducts)
@@ -144,18 +131,17 @@ export default function ProductsPage() {
         dispatch(setErrorValue({errorMessage: error.toString(), page: Page.CREATE_PRODUCT}))
       setShowCreateForm(true)
     }
-    finally {
-      dispatch(closeLoading())
-    }
   }
 
   async function handleOnSubmitUpdate(data) {
     setShowUpdateForm(false)
-    dispatch(showLoading())
     try {
       data['id'] = clickedElement.id
-      const resData = await productAPI.update(data)
+      const resData = await productAPI.update(data, token)
       const filterProducts = products.filter((r) => r.id !== resData.data.id)
+      console.log(resData.data)
+      const result = {...resData.data, isContactToSell: resData.data.isContactToSell == 'true' ? true : false} ;
+      console.log(111,resData.data)
       const newProducts = [resData.data, ...filterProducts]
       setProducts(newProducts)
     }
@@ -166,16 +152,12 @@ export default function ProductsPage() {
         dispatch(setErrorValue({errorMessage: error.toString(), page: Page.UPDATE_PRODUCT}))
       setShowUpdateForm(true)
     }
-    finally {
-      dispatch(closeLoading())
-    }
   }
 
   async function handleOnSubmitDelete() {
     setShowDeleteForm(false)
-    dispatch(showLoading())
     try {
-      await productAPI.delete(clickedElement.id)
+      await productAPI.delete(clickedElement.id, token)
       const newProducts = products.filter((r) => r.id !== clickedElement.id)
       setProducts(newProducts)
     }
@@ -185,14 +167,9 @@ export default function ProductsPage() {
       else
         alert(error.toString())
     }
-    finally {
-      dispatch(closeLoading())
-    }
   }
 
-  return loading ? (
-    <Loading />
-  ) : (
+  return(
     <>
     <Helmet>
       <title> Sản phẩm </title>
@@ -208,19 +185,21 @@ export default function ProductsPage() {
     </Stack>
 
     <Card>
+    <SearchBar
+          filterName={searchTerm}
+          onFilterName={
+            (e) => {setSearchTerm(e.target.value)}
+          }
+        />
       <Scrollbar>
         <TableContainer sx={{ minWidth: 800 }}>
           <Table>
             <UserListHead
-              order={order}
-              orderBy={orderBy}
               headLabel={TABLE_HEAD}
-              rowCount={10}
-              numSelected={selected.length}
             />
             <TableBody>
               {products.map((row) => {
-                const { id, name, brand, category, image, deleted_at} = row;
+                const { id, name, brand, category, image, isContactToSell} = row;
                 // const selectedUser = selected.indexOf(name) !== -1;
 
                 return (
@@ -230,7 +209,7 @@ export default function ProductsPage() {
                         <Checkbox checked={selectedUser} onChange={(event) => handleClick(event, name)} />
                       </TableCell> */}
 
-                    <TableCell align="right" component="th" scope="row" padding="none">
+                    <TableCell align="left" component="th" scope="row" >
                       <Stack direction="row" alignItems="center" spacing={2}>
                         <Typography variant="subtitle2" noWrap>
                           {name}
@@ -241,65 +220,40 @@ export default function ProductsPage() {
                     <TableCell align="left">{brand?.name}</TableCell>
 
                     <TableCell align="left">{category?.name}</TableCell>
+                    <TableCell align="left">{isContactToSell ? 'Bật' : 'Tắt'}</TableCell>
 
                     <TableCell align="left">
                       <Image src={image?.path} alt={name} height={100} width={100} />
                     </TableCell>
                     <TableCell align="right">
-                      <Button aria-describedby={id} variant="contained" onClick={handleOpenMenu} >
-                        click
-                        </Button>
-                      <Popover
-                        open={Boolean(open)}
-                        anchorEl={open}
-                        onClose={handleCloseMenu}
-                        // anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-                        // transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                        // PaperProps={{
-                        //   sx: {
-                        //     p: 1,
-                        //     width: 140,
-                        //     '& .MuiMenuItem-root': {
-                        //       px: 1,
-                        //       typography: 'body2',
-                        //       borderRadius: 0.75,
-                        //     },
-                        //   },
-                        // }}
-                      >
-                        <MenuItem onClick={() => {
-                          handleDetailModalShow(row)
-                          handleCloseMenu()
-                        }}>
-                          <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-                          Xem chi tiết
-                        </MenuItem>
-
-                        <MenuItem onClick={() => {
-                          handleUpdateFormShow(row)
-                          handleCloseMenu()
-                        }}>
-                          <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-                          Chỉnh sửa
-                        </MenuItem>
-
-                        <MenuItem 
-                          onClick={() => {
+                        <ActionDropdown
+                          clickedElement={row}
+                          onUpdateClick={() => {
+                            handleUpdateFormShow(row)
+                          }}
+                          onDeleteClick={() => {
                             handleDeleteFormShow(row)
-                            handleCloseMenu()
-                          }} 
-                          sx={{ color: 'error.main' }}
-                        >
-                          <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
-                          Xoá
-                        </MenuItem>
-                      </Popover>
-                    </TableCell>
+                          }}
+                          onDetailClick={() => {
+                            handleDetailModalShow(row)
+                          }}
+                        />
+                      </TableCell>
                   </TableRow>
                 );
               })}
             </TableBody>
           </Table>
+          <ReactPaginate
+          className="pagination"
+                breakLabel="..."
+                nextLabel=">"
+                onPageChange={handlePageClick}
+                pageRangeDisplayed={4}
+                pageCount={pageCount? pageCount: 0}
+                previousLabel="<"
+                renderOnZeroPageCount={null}
+            />
         </TableContainer>
       </Scrollbar>
     </Card>
@@ -318,12 +272,21 @@ export default function ProductsPage() {
         onSubmit={(data) => {
           handleOnSubmitUpdate(data);
         }}
-        onClose={() => handleCloseUpdateFormShow()}
+        onClose={() => {handleCloseUpdateFormShow()}}
+      />
+
+    <DeleteProductModal
+        isShow={showDeleteForm}
+        activeProduct={clickedElement}
+        onSubmit={(data) => {
+          handleOnSubmitDelete(data);
+        }}
+        onClose={() => {handleCloseDeleteFormShow()}}
       />
 
       <ProductDetailModal 
         isShow = {showDetailModal}
-        onClose={() => handleCloseUpdateFormShow()}
+        onClose={() => {handleCloseDetailModalShow()}}
         product = {clickedElement}
       />
   </>

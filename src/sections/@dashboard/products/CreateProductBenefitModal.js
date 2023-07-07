@@ -30,6 +30,7 @@ function CreateProductBenefitModal(props) {
     }
   
     if (onSubmit) onSubmit(data);
+    setName('')
   }
 
   return (

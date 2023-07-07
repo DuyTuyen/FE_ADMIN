@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { useEffect, useState } from 'react';
 // @mui
-import {Button, Table, Stack, Typography, Card, TableContainer, TableBody, TableRow, TableCell, FormControl, MenuItem, Select } from '@mui/material';
+import {Button, Table, Stack, Typography, Card, TableContainer, TableBody, TableRow, TableCell } from '@mui/material';
 // components
 
 import { solutionAPI } from '../api/ConfigAPI';
@@ -10,38 +10,27 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { showLoading, closeLoading } from 'src/redux/slices/LoadingSlice';
 import { setErrorValue } from 'src/redux/slices/ErrorSlice';
-import Loading from 'src/components/loading/Loading';
 import Scrollbar from 'src/components/scrollbar/Scrollbar';
-import { UserListHead } from 'src/sections/@dashboard/user';
+import UserListHead from 'src/sections/@dashboard/user/UserListHead';
 
 import Iconify from 'src/components/iconify/Iconify';
 import UpdateSolutionModal from 'src/sections/@dashboard/solution/UpdateSolutionModal';
 import CreateSolutionModal from 'src/sections/@dashboard/solution/CreateSolutionModal';
 import DeleteSolutionModal from 'src/sections/@dashboard/solution/DeleteSolutionModal';
 import Page from '../enums/page';
+import ActionDropdown from 'src/components/Dropdown/ActionDropdown';
+import SearchBar from 'src/components/searchbar';
+import ReactPaginate from 'react-paginate';
 
 const TABLE_HEAD = [
   { id: 'title', label: 'Tiêu đề', alignRight: false },
-  { id: 'content', label: 'Nội dung', alignRight: false },
   { id: 'action', label: 'Chỉnh sửa', alignRight: true}
 ];
 
 // ----------------------------------------------------------------------
 export default function SolutionPage() {
-  const loading = useSelector(state => state.loading.value)
-
+  const token = useSelector(state => state.token.value)
   const dispatch = useDispatch()
-
-
-  const [open, setOpen] = useState(null);
-
-  const [page, setPage] = useState(0);
-
-  const [order, setOrder] = useState('asc');
-
-  const [selected, setSelected] = useState([]);
-
-  const [orderBy, setOrderBy] = useState('name');
 
   const [solutions, setSolution] = useState([{}])
   
@@ -51,24 +40,16 @@ export default function SolutionPage() {
 
   const [showDeleteForm, setShowDeleteForm] = useState(false);
 
-  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const [clickedElement, setClickedElement] = useState(null);
 
-  const handleOpenMenu = (event) => {
-    setOpen(event.currentTarget);
-  };
+  const [searchTerm, setSearchTerm] = useState('')
+  const [pageCount, setPageCount] = useState(0)
 
-  const handleCloseMenu = () => {
-    setOpen(null);
-  };
+  const [activePage, setActivePage] = useState(1)
 
-  const handleOpenFilter = () => {
-    setOpenFilter(true);
-  };
-
-  const handleCloseFilter = () => {
-    setOpenFilter(false);
+  const handlePageClick = (event) => {
+    setActivePage(event.selected);
   };
 
   function handleCreateFormShow() {
@@ -97,21 +78,13 @@ export default function SolutionPage() {
     setShowDeleteForm(false)
   }
 
-  function handleDetailModalShow(solution) {
-    setClickedElement(solution);
-    setShowDetailModal(true);
-  }
-
-  function handleCloseDetailModalShow() {
-    setShowDetailModal(false)
-  }
-
   useEffect(() => {
     async function getSolution() {
       dispatch(showLoading());
       try {
-        const res = await solutionAPI.getAll();
+        const res = await solutionAPI.getAll(`page=${activePage}&q=${searchTerm}`, token);
         setSolution(res.data.data);
+        setPageCount(res.data.meta.pageCount)
       } catch (error) {
         if (axios.isAxiosError(error))
           alert(error.response ? error.response.data.message : error.message);
@@ -121,14 +94,15 @@ export default function SolutionPage() {
         dispatch(closeLoading());
       }
     }
-    getSolution();
-  }, []);
+    if(token)
+      getSolution();
+  }, [token, activePage, searchTerm, dispatch]);
 
   async function handleOnSubmitCreate(data) {
     setShowCreateForm(false)
     dispatch(showLoading())
     try {
-      const res = await solutionAPI.create(data)
+      const res = await solutionAPI.create(data, token)
       const newSolution = [...solutions]
       newSolution.unshift(res.data)
       setSolution(newSolution)
@@ -150,7 +124,7 @@ export default function SolutionPage() {
     dispatch(showLoading())
     try {
       data['id'] = clickedElement.id
-      const resData = await solutionAPI.update(data)
+      const resData = await solutionAPI.update(data, token)
       const filterSolution = solutions.filter((r) => r.id !== resData.data.id)
       const newSolution = [resData.data, ...filterSolution]
       setSolution(newSolution)
@@ -171,7 +145,7 @@ export default function SolutionPage() {
     setShowDeleteForm(false)
     dispatch(showLoading())
     try {
-      await solutionAPI.delete(clickedElement.id)
+      await solutionAPI.delete(clickedElement.id, token)
       const newSolution = solutions.filter((r) => r.id !== clickedElement.id)
       setSolution(newSolution)
     }
@@ -186,9 +160,7 @@ export default function SolutionPage() {
     }
   }
 
-  return loading ? (
-    <Loading />
-  ) : (
+  return (
     <>
     <Helmet>
       <title> Giải pháp</title>
@@ -204,15 +176,17 @@ export default function SolutionPage() {
     </Stack>
 
     <Card>
+      <SearchBar
+          filterName={searchTerm}
+          onFilterName={
+            (e) => {setSearchTerm(e.target.value)}
+          }
+        />
       <Scrollbar>
         <TableContainer sx={{ minWidth: 800 }}>
           <Table>
             <UserListHead
-              order={order}
-              orderBy={orderBy}
               headLabel={TABLE_HEAD}
-              rowCount={10}
-              numSelected={selected.length}
             />
             <TableBody>
               {solutions.map((row) => {
@@ -224,37 +198,34 @@ export default function SolutionPage() {
 
                     <TableCell align="left">{title}</TableCell>
 
-                    <TableCell align="left">{content}</TableCell>
 
                     <TableCell align="right">
-                    <FormControl>
-                      <Select>
-                      <MenuItem onClick={(e) => {
+                        <ActionDropdown
+                          clickedElement={row}
+                          onUpdateClick={() => {
                             handleUpdateFormShow(row)
-                            handleCloseMenu()
-                          }}>
-                            <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-                              Chỉnh sửa
-                          </MenuItem>
-
-                          <MenuItem 
-                            onClick={() => {
-                              handleDeleteFormShow(row)
-                              handleCloseMenu()
-                            }} 
-                            sx={{ color: 'error.main' }}
-                          >
-                            <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
-                            Xoá
-                          </MenuItem>
-                      </Select>
-                    </FormControl>
-                    </TableCell>
+                          }}
+                          onDeleteClick={() => {
+                            handleDeleteFormShow(row)
+                          }}
+                        />
+                      </TableCell>
                   </TableRow>
                 );
               })}
             </TableBody>
           </Table>
+          <ReactPaginate
+          className="pagination"
+                breakLabel="..."
+                nextLabel=">"
+                onPageChange={handlePageClick}
+                pageRangeDisplayed={5}
+                pageCount={pageCount? pageCount: 0}
+                previousLabel="<"
+                renderOnZeroPageCount={null}
+
+            />
         </TableContainer>
       </Scrollbar>
     </Card>

@@ -23,4 +23,10 @@ module.exports = Object.freeze({
     CREATE_SOLUTION: 'create_solution',
     UPDATE_SOLUTION: 'update_solution',
     DELETE_SOLUTION: 'delete_solution',
+    CREATE_TECHNOVA_SERVICE: 'create_technova_service',
+    UPDATE_TECHNOVA_SERVICE: 'update_technova_service',
+    DELETE_TECHNOVA_SERVICE: 'delete_technova_service',
+    CREATE_EMPLOYEE: 'create_employee',
+    UPDATE_EMPLOYEE: 'update_employee',
+    DELETE_EMPLOYEE: 'delete_employee',
 })

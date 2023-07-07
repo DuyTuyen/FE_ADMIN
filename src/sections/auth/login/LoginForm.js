@@ -1,31 +1,29 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @mui
-import { Link, Stack, IconButton, InputAdornment, TextField, Checkbox } from '@mui/material';
+import {  Stack, IconButton, InputAdornment, TextField } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 // components
 import Iconify from '../../../components/iconify';
-import { userAPI } from 'src/api/ConfigAPI';
+import { authAPI } from 'src/api/ConfigAPI';
 import { useDispatch, useSelector } from 'react-redux';
 import { setToken } from 'src/redux/slices/TokenSlice';
 import axios from 'axios';
-import { setErrorValue } from 'src/redux/slices/ErrorSlice';
 import { closeLoading, showLoading } from 'src/redux/slices/LoadingSlice';
 import Loading from 'src/components/loading/Loading';
-import { Alert, Form } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 
 // ----------------------------------------------------------------------
 
 export default function LoginForm() {
-  const { loading, error } = useSelector(state => {
+  const { loading } = useSelector(state => {
     return {
       loading: state.loading.value,
-      error: state.error.value
     }
   })
   const navigate = useNavigate();
   const dispatch = useDispatch()
-  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false);
 
@@ -33,13 +31,13 @@ export default function LoginForm() {
     try {
       e.preventDefault()
       dispatch(showLoading());
-      const res = await userAPI.login({username, password})
-      dispatch(setToken(res.data))
+      const res = await authAPI.login({email, password})
+      dispatch(setToken(res.data.accessToken))
       navigate("/dashboard")
     } catch (error) {
       if (axios.isAxiosError(error))
-        dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
-      else dispatch(setErrorValue(error.toString()));
+        alert((error.response ? error.response.data.message : error.message));
+      else alert((error.toString()));
     } finally {
       dispatch(closeLoading());
     }
@@ -49,18 +47,9 @@ export default function LoginForm() {
     loading ?
       <Loading /> :
       <>
-        {error !== '' ? (
-          error.split('---').map((err, index) => (
-            <Alert key={index} variant="danger" severity="error">
-              {err}
-            </Alert>
-          ))
-        ) : (
-          <></>
-        )}
         <Form onSubmit={handleLogin}>
           <Stack spacing={3}>
-            <TextField value={username} onChange={(e) => { setUsername(e.target.value) }} name="text" label="Nhập tài khoản" />
+            <TextField value={email} onChange={(e) => { setEmail(e.target.value) }} name="text" label="Nhập email" />
             <TextField
               name="password"
               label="Nhập mật khẩu"
@@ -80,7 +69,7 @@ export default function LoginForm() {
           </Stack>
 
           <LoadingButton style={{ marginTop: "10px" }} fullWidth size="large" type="submit" variant="contained">
-            Login
+            Đăng nhập
           </LoadingButton>
         </Form>
       </>

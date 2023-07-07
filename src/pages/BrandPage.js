@@ -17,9 +17,11 @@ import CreateBrandModal from 'src/sections/@dashboard/brand/CreateBrandModal';
 import UpdateBrandModal from 'src/sections/@dashboard/brand/UpdateBrandModal';
 import DeleteBrandModal from 'src/sections/@dashboard/brand/DeleteBrandModal';
 import Page from '../enums/page';
+import SearchBar from 'src/components/searchbar';
+import ReactPaginate from 'react-paginate';
 // ----------------------------------------------------------------------
 export default function BrandPage() {
-  const loading = useSelector((state) => state.loading.value);
+  const token = useSelector((state) => state.token.value);
 
   const dispatch = useDispatch();
 
@@ -32,6 +34,16 @@ export default function BrandPage() {
   const [showDeleteForm, setShowDeleteForm] = useState(false);
 
   const [clickedElement, setClickedElement] = useState(null);
+
+  const [pageCount, setPageCount] = useState(0)
+
+  const [activePage, setActivePage] = useState(1)
+
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const handlePageClick = (event) => {
+    setActivePage(event.selected + 1);
+  };
 
   function hanldeCreateFormShow() {
     setShowCreateForm(true);
@@ -61,28 +73,25 @@ export default function BrandPage() {
 
   useEffect(() => {
     async function getBrands() {
-      dispatch(showLoading());
       try {
-        const res = await brandAPI.getAll();
-        console.log(res.data)
+        const res = await brandAPI.getAll(`page=${activePage}&take=5&q=${searchTerm}`,token);
         setBrands(res.data.data);
+        setPageCount(res.data.meta.pageCount)
       } catch (error) {
         if (axios.isAxiosError(error))
         alert((error.response ? error.response.data.message : error.message))
       else
         alert((error.toString()))
-      } finally {
-        dispatch(closeLoading());
-      }
+      } 
     }
-    getBrands();
-  }, []);
+    if(token)
+      getBrands();
+  }, [token, activePage, searchTerm]);
 
   async function handleOnSubmitCreate(formData) {
     setShowCreateForm(false);
-    dispatch(showLoading());
     try {
-      const res = await brandAPI.create(formData);
+      const res = await brandAPI.create(formData, token);
       const newBrands = [...brands];
       newBrands.unshift(res.data);
       setBrands(newBrands);
@@ -92,16 +101,14 @@ export default function BrandPage() {
       else 
         dispatch(setErrorValue({errorMessage: error.toString(), page: Page.CREATE_BRAND}));
       setShowCreateForm(true);
-    } finally {
-      dispatch(closeLoading());
     }
   }
 
   async function handleOnSubmitUpdate(formData) {
     setShowUpdateForm(false);
-    dispatch(showLoading());
     try {
-      const resData = await brandAPI.update(clickedElement.id, formData);
+      formData['id'] = clickedElement.id
+      const resData = await brandAPI.update(formData, token);
       const filterBrands = brands.filter((r) => r.id !== clickedElement.id);
       const newBrands = [resData.data, ...filterBrands];
       setBrands(newBrands);
@@ -111,16 +118,13 @@ export default function BrandPage() {
       else
         dispatch(setErrorValue({errorMessage: error.toString(), page: Page.UPDATE_BRAND}))
       setShowUpdateForm(true);
-    } finally {
-      dispatch(closeLoading());
     }
   }
 
   async function handleOnSubmitDelete() {
     setShowDeleteForm(false);
-    dispatch(showLoading());
     try {
-      await brandAPI.delete(clickedElement.id);
+      await brandAPI.delete(clickedElement.id, token);
       const newBrands = brands.filter((r) => r.id !== clickedElement.id);
       setBrands(newBrands);
     } catch (error) {
@@ -128,11 +132,9 @@ export default function BrandPage() {
         alert((error.response ? error.response.data.message : error.message));
       else 
         alert(error.toString());
-    } finally {
-      dispatch(closeLoading());
-    }
+    } 
   }
-  return loading ? <Loading /> : (
+  return (
     <>
       <Helmet>
         <title>Thương hiệu</title>
@@ -147,11 +149,31 @@ export default function BrandPage() {
               Tạo mới
             </Button>
         </Stack>
+        <Stack>
+          <SearchBar
+            filterName={searchTerm}
+            onFilterName={
+              (e) => {setSearchTerm(e.target.value)}
+            }
+          />
+        </Stack>
             <BrandList
               brands={brands}
               onUpdateClick={handleUpdateFormShow}
               onDeleteClick={handleDeleteFormShow}
             /> 
+            <Stack>
+            <ReactPaginate
+          className="pagination"
+                breakLabel="..."
+                nextLabel=">"
+                onPageChange={handlePageClick}
+                pageRangeDisplayed={4}
+                pageCount={pageCount? pageCount: 0}
+                previousLabel="<"
+                renderOnZeroPageCount={null}
+            />
+            </Stack>
       </Container>
       <CreateBrandModal
         isShow={showCreateForm}

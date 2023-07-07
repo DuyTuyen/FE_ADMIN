@@ -32,6 +32,11 @@ const navConfig = [
     icon: icon('ic_blog'),
   },
   {
+    title: 'Hình ảnh đại diện',
+    path: '/dashboard/banner',
+    icon: icon('ic_blog'),
+  },
+  {
     title: 'Tin tức',
     path: '/dashboard/news',
     icon: icon('ic_blog'),
@@ -39,6 +44,26 @@ const navConfig = [
   {
     title: 'Bài viết giới thiệu',
     path: '/dashboard/about-company',
+    icon: icon('ic_blog'),
+  },
+  {
+    title: 'Dịch vụ',
+    path: '/dashboard/technova-service',
+    icon: icon('ic_blog'),
+  },
+  {
+    title: 'Giải pháp',
+    path: '/dashboard/solution',
+    icon: icon('ic_blog'),
+  },
+  {
+    title: 'Khách hàng',
+    path: '/dashboard/user',
+    icon: icon('ic_blog'),
+  },
+  {
+    title: 'Nhân viên',
+    path: '/dashboard/employee',
     icon: icon('ic_blog'),
   },
 ];

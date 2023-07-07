@@ -40,10 +40,14 @@ function CreateOrderDetailModal(props) {
         quantity,
         price
     }
-    console.log(payload)
     if (onSubmit){
       onSubmit(payload);
       handleClose()
+      setProductPackageId(null)
+      selectedProduct(null)
+      setPrice(500)
+      setProductName('')
+      setQuantity(1)
     }
   }
 

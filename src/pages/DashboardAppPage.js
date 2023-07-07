@@ -2,51 +2,50 @@ import { Helmet } from 'react-helmet-async';
 // @mui
 import { Grid, Container } from '@mui/material';
 import AppWebsiteVisits from 'src/sections/@dashboard/app/AppWebsiteVisits';
-import AppConversionRates from 'src/sections/@dashboard/app/AppConversionRates';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Loading from 'src/components/loading/Loading';
 import MONTHS from '../enums/months'
 import revenue from '../_mock/revenue'
-import topProducts from '../_mock/topProduct'
+import { closeLoading, showLoading } from 'src/redux/slices/LoadingSlice';
+import { statisticAPI } from 'src/api/ConfigAPI';
+import axios from 'axios';
 // components
 // sections
 
 // ----------------------------------------------------------------------
 
 export default function DashboardAppPage() {
-  const { loading } = useSelector(state => {
+  const { loading, token } = useSelector(state => {
     return {
-      loading: state.loading.value
+      loading: state.loading.value,
+      token: state.token.value
     }
   })
   const [myRevenue, setMyRevenue] = useState(revenue)
-  const [topSoldProducts, setTopSoldProducts] = useState(topProducts)
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  // useEffect(() => {
-  //   dispatch(showLoading());
-  //   Promise.all([statisticAPI.getRevenue(), statisticAPI.getTopSoldProducts()])
-  //     .then((results) => {
-  //       const data = results[0].data
-  //       const revenue = Object.values(data.revenue)
-  //       const costPrice = Object.values(data.costPrice)
-  //       const gap = Object.values(data.gap)
-  //       setMyRevenue({ revenue, costPrice, gap });
-  //       setTopSoldProducts(results[1].data)
-  //     })
-  //     .catch((error) => {
-  //       if (axios.isAxiosError(error))
-  //         dispatch(setErrorValue(error.response ? error.response.data.message : error.message));
-  //       else dispatch(setErrorValue(error.toString()));
-  //       navigate("/error")
-  //     })
-  //     .finally(() => {
-  //       dispatch(closeLoading());
-  //     })
-  // }, [])
+  useEffect(() => {
+    dispatch(showLoading());
+    Promise.all([statisticAPI.getAll(token)])
+      .then((results) => {
+        console.log(results[0].data)
+        const data = results[0].data
+        const revenue = Object.values(data)
+        setMyRevenue({ revenue});
+      })
+      .catch((error) => {
+        if (axios.isAxiosError(error))
+          alert((error.response ? error.response.data.message : error.message));
+        else alert((error.toString()));
+        navigate("/error")
+      })
+      .finally(() => {
+        dispatch(closeLoading());
+      })
+  }, [dispatch, token, navigate])
 
   return (
     loading ?
@@ -72,25 +71,7 @@ export default function DashboardAppPage() {
                     fill: 'solid',
                     data: myRevenue?.revenue,
                   },
-                  {
-                    name: 'Chi phí bỏ ra',
-                    type: 'area',
-                    fill: 'gradient',
-                    data: myRevenue?.costPrice
-                  },
-                  {
-                    name: 'Chênh lệch',
-                    type: 'none',
-                    data: myRevenue?.gap,
-                  },
                 ]}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={12} lg={12}>
-              <AppConversionRates
-                title="Top sản phẩm bán chạy trong tháng"
-                chartData={topSoldProducts}
               />
             </Grid>
           </Grid>
