@@ -6,7 +6,7 @@ import Scrollbar from 'src/components/scrollbar/Scrollbar';
 import { useState } from 'react';
 import Iconify from 'src/components/iconify/Iconify';
 import {  benefitValueAPI, productAPI, productBenefitAPI, productPackageAPI } from '../../../api/ConfigAPI';
-import CreateProductPackageModal from './CreateProductPackageModal';
+import CreateProductPackageModal from './createProductPackageModal';
 import CreateProductBenefitModal from './CreateProductBenefitModal';
 import axios from 'axios';
 import { setErrorValue } from 'src/redux/slices/ErrorSlice';
